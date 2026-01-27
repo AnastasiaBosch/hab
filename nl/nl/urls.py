@@ -18,7 +18,6 @@ from django.urls import path, re_path
 from startik import views
  
 urlpatterns = [
-    path('', views.index),
-    path('about', views.about, kwargs={"name":"Tom", "age": 38}),
+   path("index", views.index),
 ]
 

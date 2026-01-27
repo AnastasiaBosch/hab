@@ -1,14 +1,12 @@
 from django.http import HttpResponse
   
 def index(request):
-    return HttpResponse("Главная")
- 
-def about(request, name, age):
+    host = request.META["HTTP_HOST"] # получаем адрес сервера
+    user_agent = request.META["HTTP_USER_AGENT"]    # получаем данные бразера
+    path = request.path     # получаем запрошенный путь
+     
     return HttpResponse(f"""
-                        О пользователе
-                        Имя: {name}
-                        Возраст: {age}
-                        """)
- 
-def contact(request):
-    return HttpResponse("Контакты")
+        <p>Host: {host}</p>
+        <p>Path: {path}</p>
+        <p>User-agent: {user_agent}</p>
+    """)

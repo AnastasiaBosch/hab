@@ -19,7 +19,6 @@ from startik import views
  
 urlpatterns = [
     path('', views.index),
-    re_path(r'^about', views.about),
-    re_path(r'^contact', views.contact),
-    ]
+    path('about', views.about, kwargs={"name":"Tom", "age": 38}),
+]
 

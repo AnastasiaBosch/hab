@@ -17,6 +17,8 @@ class Book(models.Model):
     # ManyToManyField used because genre can contain many books. Books can cover many genres.
     # Genre class has already been defined so we can specify the object above.
     summary = models.TextField(max_length=1000, help_text="Введите краткое описание книги")
+    genre = models.ManyToManyField(Genre, help_text="Select a genre for this book")
+
     def __str__(self):
         """
         String for representing the Model object.
@@ -30,6 +32,13 @@ class Book(models.Model):
         """
         return reverse('book-detail', args=[str(self.id)])
 
+    def display_genre(self):
+        """
+        Creates a string for the Genre. This is required to display genre in Admin.
+        """
+        return ', '.join([ genre.name for genre in self.genre.all()[:3] ])
+    display_genre.short_description = 'Genre'
+    
 class Author(models.Model):
     """
     Model representing an author.

@@ -18,13 +18,32 @@ class Book(models.Model):
     # Genre class has already been defined so we can specify the object above.
     summary = models.TextField(max_length=1000, help_text="Введите краткое описание книги")
     genre = models.ManyToManyField(Genre, help_text="Select a genre for this book")
-
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена", default=0)
+    quantity = models.PositiveIntegerField(default=0, verbose_name="Количество на складе")
+    
     def __str__(self):
         """
         String for representing the Model object.
         """
         return self.title
 
+    @property
+    def is_available(self):
+        """Проверяет, есть ли книга в наличии"""
+        return self.quantity > 0
+    
+    def reduce_quantity(self, amount=1):
+        """Уменьшает количество книг на складе"""
+        if self.quantity >= amount:
+            self.quantity -= amount
+            self.save()
+            return True
+        return False
+    
+    def increase_quantity(self, amount=1):
+        """Увеличивает количество книг на складе"""
+        self.quantity += amount
+        self.save()
 
     def get_absolute_url(self):
         """

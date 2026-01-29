@@ -31,9 +31,9 @@
         
         <div class="collapse navbar-collapse" id="navbar-collapse">
           <ul class="nav navbar-nav">
-            <!-- Убрали "Главная" так как есть логотип -->
-            <li><a href="{% url 'books' %}">Все книги</a></li> <!-- Было "Каталог книг" -->
+            <li><a href="{% url 'books' %}">Все книги</a></li>
             <li><a href="{% url 'news' %}">Новости</a></li>
+            <li><a href="{% url 'faq' %}">FAQ</a></li>
           </ul>
           
           <ul class="nav navbar-nav navbar-right">
@@ -48,10 +48,10 @@
         <div class="col-sm-2">
           {% block sidebar %}
             <ul class="sidebar-nav">
-              <!-- Убрали "Все книги" так как теперь это в верхнем меню -->
               <li><a href="{% url 'index' %}">Главная</a></li>
-              <li><a href="{% url 'books' %}">Все книги</a></li> <!-- Оставляем для навигации -->
+              <li><a href="{% url 'books' %}">Все книги</a></li>
               <li><a href="{% url 'news' %}">Новости</a></li>
+              <li><a href="{% url 'faq' %}">FAQ</a></li>
             </ul>
           {% endblock %}
         </div>

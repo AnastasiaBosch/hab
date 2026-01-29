@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Author, Genre, Book
+from .models import Author, Genre, Book, News
 
 #admin.site.register(Book)
 #admin.site.register(Author)
@@ -14,3 +14,9 @@ admin.site.register(Author, AuthorAdmin)
 class BookAdmin(admin.ModelAdmin):
     list_display = ('title', 'author', 'display_genre')
 
+@admin.register(News)
+class NewsAdmin(admin.ModelAdmin):
+    list_display = ('title', 'published_date', 'is_published')
+    list_filter = ('published_date', 'is_published')
+    search_fields = ('title', 'content')
+    date_hierarchy = 'published_date'

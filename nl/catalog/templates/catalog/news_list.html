@@ -1,0 +1,42 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<h1>Новости магазина</h1>
+
+{% if news_list %}
+    {% for news in news_list %}
+        <div class="news-item" style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #ddd;">
+            <h3><a href="{% url 'news-detail' news.pk %}">{{ news.title }}</a></h3>
+            <p>{{ news.content|truncatewords:100 }}</p>
+            <small class="text-muted">
+                Опубликовано: {{ news.published_date|date:"d.m.Y H:i" }}
+            </small>
+        </div>
+    {% endfor %}
+    
+    {% if is_paginated %}
+        <div class="pagination">
+            <span class="step-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">&laquo; первая</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">предыдущая</a>
+                {% endif %}
+                
+                <span class="current">
+                    Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+                </span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">следующая</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">последняя &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+    {% endif %}
+    
+{% else %}
+    <p>Пока нет новостей.</p>
+{% endif %}
+
+<a href="{% url 'index' %}" class="btn btn-default">Вернуться на главную</a>
+{% endblock %}

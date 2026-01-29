@@ -58,3 +58,17 @@ class Author(models.Model):
         String for representing the Model object.
         """
         return '%s, %s' % (self.last_name, self.first_name)
+
+class News(models.Model):
+    title = models.CharField(max_length=200, verbose_name="Заголовок новости")
+    content = models.TextField(verbose_name="Содержание новости")
+    published_date = models.DateTimeField(auto_now_add=True, verbose_name="Дата публикации")
+    is_published = models.BooleanField(default=True, verbose_name="Опубликовано")
+    
+    class Meta:
+        ordering = ['-published_date']
+        verbose_name = 'Новость'
+        verbose_name_plural = 'Новости'
+    
+    def __str__(self):
+        return self.title

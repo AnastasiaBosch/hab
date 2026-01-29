@@ -1,0 +1,26 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="news-detail">
+    <h1>{{ news.title }}</h1>
+    
+    <div class="news-meta" style="margin-bottom: 20px;">
+        <small class="text-muted">
+            Опубликовано: {{ news.published_date|date:"d.m.Y H:i" }}
+        </small>
+    </div>
+    
+    <div class="news-content" style="margin-bottom: 30px;">
+        {{ news.content|linebreaks }}
+    </div>
+    
+    <div class="news-navigation">
+        <a href="{% url 'news' %}" class="btn btn-default">
+            <span class="glyphicon glyphicon-list"></span> Все новости
+        </a>
+        <a href="{% url 'index' %}" class="btn btn-primary">
+            <span class="glyphicon glyphicon-home"></span> На главную
+        </a>
+    </div>
+</div>
+{% endblock %}

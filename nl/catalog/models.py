@@ -14,8 +14,6 @@ class Genre(models.Model):
 class Book(models.Model):
     title = models.CharField(max_length=200)
     author = models.ForeignKey('Author', on_delete=models.SET_NULL, null=True)
-    # ManyToManyField used because genre can contain many books. Books can cover many genres.
-    # Genre class has already been defined so we can specify the object above.
     summary = models.TextField(max_length=1000, help_text="Введите краткое описание книги")
     genre = models.ManyToManyField(Genre, help_text="Select a genre for this book")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена", default=0)
@@ -29,11 +27,11 @@ class Book(models.Model):
 
     @property
     def is_available(self):
-        """Проверяет, есть ли книга в наличии"""
+        """Проверка"""
         return self.quantity > 0
     
     def reduce_quantity(self, amount=1):
-        """Уменьшает количество книг на складе"""
+        """Уменьшает"""
         if self.quantity >= amount:
             self.quantity -= amount
             self.save()
@@ -41,7 +39,7 @@ class Book(models.Model):
         return False
     
     def increase_quantity(self, amount=1):
-        """Увеличивает количество книг на складе"""
+        """Увеличивает"""
         self.quantity += amount
         self.save()
 

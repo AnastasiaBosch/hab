@@ -1,19 +1,50 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-    <h1>Book List</h1>
+    <h1>Список книг</h1>
 
     {% if book_list %}
-    <ul>
-
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Название</th>
+          <th>Автор</th>
+          <th>Жанр</th>
+          <th>Цена</th>
+          <th>Наличие</th>
+        </tr>
+      </thead>
+      <tbody>
       {% for book in book_list %}
-      <li>
-        <a href="{{ book.get_absolute_url }}">{{ book.title }}</a> ({{book.author}})
-      </li>
+      <tr>
+        <td><a href="{{ book.get_absolute_url }}">{{ book.title }}</a></td>
+        <td>{{ book.author }}</td>
+        <td>{% for genre in book.genre.all|slice:":2" %}{{ genre }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+        <td>{{ book.price }} ₽</td>
+        <td>{% if book.is_available %}✓ ({{ book.quantity }}){% else %}✗{% endif %}</td>
+      </tr>
       {% endfor %}
-
-    </ul>
+      </tbody>
+    </table>
     {% else %}
-      <p>There are no books in the library.</p>
+      <p>В библиотеке нет книг.</p>
     {% endif %}
+    
+    {% block pagination %}
+      {% if is_paginated %}
+        <div class="pagination">
+          <span class="page-links">
+            {% if page_obj.has_previous %}
+              <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">предыдущая</a>
+            {% endif %}
+            <span class="page-current">
+              Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+            </span>
+            {% if page_obj.has_next %}
+              <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">следующая</a>
+            {% endif %}
+          </span>
+        </div>
+      {% endif %}
+    {% endblock %}
 {% endblock %}

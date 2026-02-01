@@ -6,13 +6,11 @@ def index(request):
     """
     Функция отображения для домашней страницы сайта.
     """
-    # Генерация "количеств" некоторых главных объектов
     num_books=Book.objects.all().count()
     num_authors=Author.objects.count()  # Метод 'all()' применён по умолчанию.
     num_genres = Genre.objects.count()
     num_news = News.objects.filter(is_published=True).count()
-    
-    # Последние 5 новостей
+
     news_list = News.objects.filter(is_published=True).order_by('-published_date')[:5]
      
     # Отрисовка HTML-шаблона index.html с данными внутри
@@ -35,7 +33,7 @@ class BookListView(generic.ListView):
 class BookDetailView(generic.DetailView):
     model = Book
 
-# Добавим представление для списка всех новостей
+# все новости
 class NewsListView(generic.ListView):
     model = News
     template_name = 'catalog/news_list.html'
@@ -44,7 +42,7 @@ class NewsListView(generic.ListView):
     def get_queryset(self):
         return News.objects.filter(is_published=True).order_by('-published_date')
 
-# Добавим представление для детального просмотра новости
+#детальный просмотр
 class NewsDetailView(generic.DetailView):
     model = News
     template_name = 'catalog/news_detail.html'

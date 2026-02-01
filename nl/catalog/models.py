@@ -13,6 +13,7 @@ class Genre(models.Model):
 
 class Book(models.Model):
     title = models.CharField(max_length=200)
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     author = models.ForeignKey('Author', on_delete=models.SET_NULL, null=True)
     summary = models.TextField(max_length=1000, help_text="Введите краткое описание книги")
     genre = models.ManyToManyField(Genre, help_text="Select a genre for this book")

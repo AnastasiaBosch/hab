@@ -18,7 +18,13 @@
       {% for book in book_list %}
       <tr>
         <td><a href="{{ book.get_absolute_url }}">{{ book.title }}</a></td>
-        <td>{{ book.author }}</td>
+        <td>
+          {% if book.author %}
+            <a href="{% url 'author-detail' book.author.pk %}">{{ book.author }}</a>
+          {% else %}
+            Не указан
+          {% endif %}
+        </td>
         <td>{% for genre in book.genre.all|slice:":2" %}{{ genre }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
         <td>{{ book.price }} ₽</td>
         <td>{% if book.is_available %}✓ ({{ book.quantity }}){% else %}✗{% endif %}</td>

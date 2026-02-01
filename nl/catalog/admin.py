@@ -12,7 +12,8 @@ admin.site.register(Author, AuthorAdmin)
 
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'display_genre')
+    list_display = ('title', 'author', 'display_genre', 'price', 'quantity')
+    fields = ['title', 'avatar', 'author', 'summary', 'genre', 'price', 'quantity']
 
 @admin.register(News)
 class NewsAdmin(admin.ModelAdmin):

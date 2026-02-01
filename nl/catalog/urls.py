@@ -9,4 +9,6 @@ urlpatterns = [
     path('news/', views.NewsListView.as_view(), name='news'),
     path('news/<int:pk>/', views.NewsDetailView.as_view(), name='news-detail'),
     path('faq/', TemplateView.as_view(template_name='catalog/faq.html'), name='faq'),
+    path('authors/', views.AuthorListView.as_view(), name='authors'), 
+    path('author/<int:pk>/', views.AuthorDetailView.as_view(), name='author-detail'),
 ]

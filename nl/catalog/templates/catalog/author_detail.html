@@ -1,0 +1,52 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>{{ author.last_name }}, {{ author.first_name }}</h1>
+  
+  <div class="author-info" style="margin-bottom: 30px;">
+    <h3>Книги этого автора:</h3>
+    
+    {% if books_by_author %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Название</th>
+          <th>Жанр</th>
+          <th>Цена</th>
+          <th>Наличие</th>
+          <th>Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for book in books_by_author %}
+      <tr>
+        <td><a href="{% url 'book-detail' book.pk %}">{{ book.title }}</a></td>
+        <td>{% for genre in book.genre.all|slice:":2" %}{{ genre }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+        <td>{{ book.price }} ₽</td>
+        <td>{% if book.is_available %}✓ ({{ book.quantity }}){% else %}✗{% endif %}</td>
+        <td>
+          <a href="{% url 'book-detail' book.pk %}" class="btn btn-sm btn-info">
+            <span class="glyphicon glyphicon-eye-open"></span> Подробнее
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p>У этого автора пока нет книг в каталоге.</p>
+    {% endif %}
+  </div>
+  
+  <div class="author-actions">
+    <a href="{% url 'authors' %}" class="btn btn-default">
+      <span class="glyphicon glyphicon-arrow-left"></span> Все авторы
+    </a>
+    <a href="{% url 'books' %}" class="btn btn-default">
+      <span class="glyphicon glyphicon-book"></span> Все книги
+    </a>
+    <a href="{% url 'index' %}" class="btn btn-default">
+      <span class="glyphicon glyphicon-home"></span> На главную
+    </a>
+  </div>
+{% endblock %}

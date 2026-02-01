@@ -49,3 +49,17 @@ class NewsDetailView(generic.DetailView):
     
     def get_queryset(self):
         return News.objects.filter(is_published=True)
+
+class AuthorListView(generic.ListView):
+    model = Author
+    paginate_by = 10
+    template_name = 'catalog/author_list.html'
+
+class AuthorDetailView(generic.DetailView):
+    model = Author
+    template_name = 'catalog/author_detail.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['books_by_author'] = Book.objects.filter(author=self.object)
+        return context

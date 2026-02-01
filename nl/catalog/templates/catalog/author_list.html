@@ -1,0 +1,52 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>Авторы</h1>
+
+    {% if author_list %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Фамилия</th>
+          <th>Имя</th>
+          <th>Количество книг</th>
+          <th>Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for author in author_list %}
+      <tr>
+        <td><strong>{{ author.last_name }}</strong></td>
+        <td>{{ author.first_name }}</td>
+        <td>{{ author.book_set.count }}</td>
+        <td>
+          <a href="{% url 'author-detail' author.pk %}" class="btn btn-sm btn-info">
+            <span class="glyphicon glyphicon-book"></span> Книги автора
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p>В библиотеке нет авторов.</p>
+    {% endif %}
+    
+    {% if is_paginated %}
+        <div class="pagination">
+          <span class="page-links">
+            {% if page_obj.has_previous %}
+              <a href="?page={{ page_obj.previous_page_number }}">предыдущая</a>
+            {% endif %}
+            <span class="page-current">
+              Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+            </span>
+            {% if page_obj.has_next %}
+              <a href="?page={{ page_obj.next_page_number }}">следующая</a>
+            {% endif %}
+          </span>
+        </div>
+    {% endif %}
+    
+    <a href="{% url 'books' %}" class="btn btn-default">Вернуться к книгам</a>
+{% endblock %}

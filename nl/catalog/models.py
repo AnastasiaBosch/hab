@@ -20,6 +20,9 @@ class Book(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена", default=0)
     quantity = models.PositiveIntegerField(default=0, verbose_name="Количество на складе")
     
+    class Meta:
+        ordering = ['title']
+        
     def __str__(self):
         """
         String for representing the Model object.

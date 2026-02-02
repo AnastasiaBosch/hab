@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from .models import Book, Author, Genre, News
 from django.views import generic
+from .filters import BookFilter
+from django.db.models import Q
 
 def index(request):
     """
@@ -29,6 +31,36 @@ def index(request):
 class BookListView(generic.ListView):
     model = Book
     paginate_by = 10
+    template_name = 'catalog/book_list.html'
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        search_query = self.request.GET.get('search', '')
+        genre_id = self.request.GET.get('genre')
+        is_available = self.request.GET.get('is_available')
+        
+        if search_query:
+            queryset = queryset.filter(
+                Q(title__icontains=search_query) |
+                Q(author__first_name__icontains=search_query) |
+                Q(author__last_name__icontains=search_query)
+            )
+        genre_id = self.request.GET.get('genre')
+        if genre_id:
+            queryset = queryset.filter(genre__id=genre_id)
+            
+        is_available = self.request.GET.get('is_available')
+        if is_available:
+            queryset = queryset.filter(quantity__gt=0)
+            
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['genres'] = Genre.objects.all()
+        context['search_query'] = self.request.GET.get('search', '')
+        return context
     
 class BookDetailView(generic.DetailView):
     model = Book

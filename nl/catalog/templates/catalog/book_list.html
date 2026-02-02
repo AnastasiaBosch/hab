@@ -1,56 +1,165 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-    <h1>Список книг</h1>
+<h1>Список книг</h1>
 
-    {% if book_list %}
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Название</th>
-          <th>Автор</th>
-          <th>Жанр</th>
-          <th>Цена</th>
-          <th>Наличие</th>
-        </tr>
-      </thead>
-      <tbody>
-      {% for book in book_list %}
-      <tr>
-        <td><a href="{{ book.get_absolute_url }}">{{ book.title }}</a></td>
-        <td>
-          {% if book.author %}
-            <a href="{% url 'author-detail' book.author.pk %}">{{ book.author }}</a>
-          {% else %}
-            Не указан
-          {% endif %}
-        </td>
-        <td>{% for genre in book.genre.all|slice:":2" %}{{ genre }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
-        <td>{{ book.price }} ₽</td>
-        <td>{% if book.is_available %}✓ ({{ book.quantity }}){% else %}✗{% endif %}</td>
-      </tr>
-      {% endfor %}
-      </tbody>
-    </table>
+<!-- Информация о поиске -->
+{% if search_query %}
+<div class="alert alert-info" style="margin-top: 10px;">
+    Результаты поиска по запросу: <strong>"{{ search_query }}"</strong>
+    {% if book_list.count == 0 %}
+        <br>Ничего не найдено.
     {% else %}
-      <p>В библиотеке нет книг.</p>
+        <br>Найдено книг: <strong>{{ book_list.count }}</strong>
     {% endif %}
-    
-    {% block pagination %}
-      {% if is_paginated %}
-        <div class="pagination">
-          <span class="page-links">
-            {% if page_obj.has_previous %}
-              <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">предыдущая</a>
-            {% endif %}
-            <span class="page-current">
-              Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
-            </span>
-            {% if page_obj.has_next %}
-              <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">следующая</a>
-            {% endif %}
-          </span>
+    <a href="{% url 'books' %}" class="btn btn-xs btn-default" style="margin-left: 10px;">
+        Показать все книги
+    </a>
+</div>
+{% endif %}
+
+<!-- Поисковая строка -->
+<div style="margin-bottom: 20px; padding: 15px; background: #e9ecef; border-radius: 5px;">
+    <form method="get" class="form-inline">
+        <div class="input-group" style="width: 100%;">
+            <input type="text" 
+                   name="search" 
+                   class="form-control" 
+                   placeholder="Поиск по названию книги или автору..."
+                   value="{{ search_query }}"
+                   style="border-radius: 4px 0 0 4px;">
+            <div class="input-group-btn">
+                <button type="submit" class="btn btn-primary" style="border-radius: 0 4px 4px 0;">
+                    <i class="glyphicon glyphicon-search"></i> Найти
+                </button>
+            </div>
         </div>
-      {% endif %}
-    {% endblock %}
+    </form>
+</div>
+
+<!-- Форма фильтрации -->
+<div style="margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-radius: 5px;">
+    <form method="get" class="form-inline">
+        {% if search_query %}
+        <input type="hidden" name="search" value="{{ search_query }}">
+        {% endif %}
+        
+        <div class="form-group">
+            <label for="genre">Жанр:</label>
+            <select name="genre" id="genre" class="form-control" style="margin-left: 10px; margin-right: 20px;">
+                <option value="">Все жанры</option>
+                {% for genre in genres %}
+                <option value="{{ genre.id }}" 
+                    {% if request.GET.genre == genre.id|stringformat:"i" %}selected{% endif %}>
+                    {{ genre.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="is_available" value="1" 
+                    {% if request.GET.is_available %}checked{% endif %}>
+                Только в наличии
+            </label>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="margin-left: 20px;">
+            Фильтровать
+        </button>
+        
+        {% if request.GET.search or request.GET.genre or request.GET.is_available %}
+        <a href="{% url 'books' %}" class="btn btn-default" style="margin-left: 10px;">
+            Сбросить все
+        </a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Список книг -->
+{% if book_list %}
+<div class="list-group">
+    {% for book in book_list %}
+    <div class="list-group-item">
+        <div class="row">
+            <div class="col-md-8">
+                <h4 class="list-group-item-heading">
+                    <a href="{% url 'book-detail' book.pk %}">{{ book.title }}</a>
+                </h4>
+                <p class="list-group-item-text">
+                    <strong>Автор:</strong> 
+                    {% if book.author %}
+                        <a href="{% url 'author-detail' book.author.pk %}">{{ book.author }}</a>
+                    {% else %}
+                        Не указан
+                    {% endif %}
+                    <br>
+                    <strong>Жанры:</strong> 
+                    {% for genre in book.genre.all %}
+                        <span class="label label-default">{{ genre }}</span>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                    <br>
+                    <strong>Цена:</strong> {{ book.price }} ₽
+                    <strong> | Наличие:</strong> 
+                    {% if book.is_available %}
+                        <span class="text-success">В наличии ({{ book.quantity }})</span>
+                    {% else %}
+                        <span class="text-danger">Нет в наличии</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-4 text-right">
+                <a href="{% url 'book-detail' book.pk %}" class="btn btn-info btn-sm">
+                    Подробнее
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+    <div class="alert alert-warning">
+        {% if request.GET.search or request.GET.genre or request.GET.is_available %}
+            По вашему запросу ничего не найдено.
+        {% else %}
+            В библиотеке пока нет книг.
+        {% endif %}
+    </div>
+{% endif %}
+
+<!-- Пагинация -->
+{% if is_paginated %}
+<div class="pagination" style="margin-top: 20px;">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if request.GET.genre %}genre={{ request.GET.genre }}&{% endif %}{% if request.GET.is_available %}is_available=1&{% endif %}page={{ page_obj.previous_page_number }}">
+                ← Назад
+            </a>
+        {% endif %}
+        
+        <span class="current" style="margin: 0 15px;">
+            Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+        </span>
+        
+        {% if page_obj.has_next %}
+            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if request.GET.genre %}genre={{ request.GET.genre }}&{% endif %}{% if request.GET.is_available %}is_available=1&{% endif %}page={{ page_obj.next_page_number }}">
+                Вперед →
+            </a>
+        {% endif %}
+    </span>
+</div>
+{% endif %}
+
+<!-- Информация о количестве книг -->
+<div class="well well-sm" style="margin-top: 30px; background-color: #f8f9fa; padding: 10px 15px;">
+    <small class="text-muted">
+        {% if book_list %}
+            Показано {{ book_list.count }} из {{ book_list.paginator.count }} книг
+        {% else %}
+            В каталоге нет книг
+        {% endif %}
+    </small>
+</div>
+
 {% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<h1>Профиль пользователя {{ user.username }}</h1>
+
+<p><strong>Имя пользователя:</strong> {{ user.username }}</p>
+<p><strong>Дата регистрации:</strong> {{ user.date_joined|date:"d.m.Y" }}</p>
+
+<hr>
+
+<h2>Система скидок</h2>
+<p><strong>Сумма покупок:</strong> {{ profile.total_purchases }} ₽</p>
+<p><strong>Ваша скидка:</strong> {{ profile.discount_percent }}%</p>
+
+{% with next_level=profile.next_level_info %}
+    {% if next_level.target %}
+        {% with need=next_level.target|add:"-1" %}
+            {% with diff=need|add:"-"|add:profile.total_purchases %}
+                <p><strong>До скидки {{ next_level.discount }}%:</strong> {{ diff }} ₽</p>
+            {% endwith %}
+        {% endwith %}
+    {% endif %}
+{% endwith %}
+
+<hr>
+
+<h2>История покупок</h2>
+{% if user.purchases.all %}
+    <ul>
+        {% for purchase in user.purchases.all|slice:":5" %}
+            <li>{{ purchase.purchase_date|date:"d.m.Y" }} - {{ purchase.book.title }} - {{ purchase.total_price }} ₽</li>
+        {% endfor %}
+    </ul>
+    <p><a href="{% url 'purchase_history' %}">Вся история покупок</a></p>
+{% else %}
+    <p>У вас нет покупок</p>
+{% endif %}
+
+<hr>
+
+<p><a href="{% url 'books' %}">Каталог книг</a> | <a href="{% url 'logout' %}">Выйти</a></p>
+{% endblock %}

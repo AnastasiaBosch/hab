@@ -128,3 +128,6 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+LOGIN_REDIRECT_URL = '/catalog/accounts/profile/'
+LOGOUT_REDIRECT_URL = '/catalog/accounts/login/'
+LOGIN_URL = '/catalog/accounts/login/'

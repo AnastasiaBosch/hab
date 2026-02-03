@@ -1,34 +1,33 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-  <div class="row">
-    <div class="col-md-4">
-      {% if book.avatar %}
-        <img src="{{ book.avatar.url }}" class="img-responsive" alt="{{ book.title }}" style="max-height: 400px;">
-      {% else %}
-        <img src="/static/images/default-book.jpg" class="img-responsive" alt="Нет обложки" style="max-height: 400px;">
-      {% endif %}
-    </div>
-    <div class="col-md-8">
-      <h1>{{ book.title }}</h1>
-      <p><strong>Автор:</strong> 
-        {% if book.author %}
-          <a href="{% url 'author-detail' book.author.pk %}">{{ book.author }}</a>
-        {% else %}
-          Не указан
-        {% endif %}
-      </p>
-      <p><strong>Автор:</strong> <a href="">{{ book.author }}</a></p>
-      <p><strong>Краткое описание:</strong> {{ book.summary }}</p>
-      <p><strong>Жанр:</strong> {% for genre in book.genre.all %} {{ genre }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-      <p><strong>Цена:</strong> {{ book.price }} ₽</p>
-      <p><strong>Количество на складе:</strong> {{ book.quantity }}</p>
-      <p><strong>Доступно:</strong> {% if book.is_available %}Да{% else %}Нет{% endif %}</p>
+<h1>{{ book.title }}</h1>
 
-      <a href="{% url 'books' %}" class="btn btn-default">Вернуться к списку</a>
-      {% if book.author %}
-          <a href="{% url 'author-detail' book.author.pk %}" class="btn btn-info">
-            <span class="glyphicon glyphicon-user"></span> Все книги этого автора
-          </a>
-        {% endif %}
-      {% endblock %}
+{% if book.avatar %}
+    <img src="{{ book.avatar.url }}" width="200" alt="{{ book.title }}">
+{% endif %}
+
+<p><strong>Автор:</strong> {{ book.author|default:"Не указан" }}</p>
+<p><strong>Цена:</strong> {{ book.price }} ₽</p>
+<p><strong>В наличии:</strong> {{ book.quantity }} шт.</p>
+<p><strong>Описание:</strong> {{ book.summary }}</p>
+
+{% if book.is_available %}
+    {% if user.is_authenticated %}
+        <p>
+            <a href="{% url 'add_to_cart' book.pk %}" class="btn btn-primary">
+                В корзину
+            </a>
+            <a href="{% url 'make_purchase' book.pk %}" class="btn btn-success">
+                Купить
+            </a>
+        </p>
+    {% else %}
+        <p><a href="{% url 'login' %}">Войдите, чтобы купить</a></p>
+    {% endif %}
+{% else %}
+    <p>Книга отсутствует</p>
+{% endif %}
+
+<p><a href="{% url 'books' %}">← Назад</a></p>
+{% endblock %}

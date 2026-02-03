@@ -1,0 +1,61 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Регистрация нового пользователя</h3>
+            </div>
+            <div class="panel-body">
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-success">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="id_username">Имя пользователя:</label>
+                        <input type="text" name="username" class="form-control" id="id_username" required>
+                        <small class="text-muted">Обязательное поле. Не более 150 символов. Только буквы, цифры и @/./+/-/_.</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_password1">Пароль:</label>
+                        <input type="password" name="password1" class="form-control" id="id_password1" required>
+                        <small class="text-muted">
+                            <ul>
+                                <li>Пароль не должен быть слишком похож на другую вашу личную информацию.</li>
+                                <li>Пароль должен содержать как минимум 8 символов.</li>
+                                <li>Пароль не должен быть слишком простым и распространенным.</li>
+                                <li>Пароль не может состоять только из цифр.</li>
+                            </ul>
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_password2">Подтверждение пароля:</label>
+                        <input type="password" name="password2" class="form-control" id="id_password2" required>
+                        <small class="text-muted">Введите тот же пароль, что и выше, для проверки.</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success btn-block">Зарегистрироваться</button>
+                    </div>
+                </form>
+                
+                <hr>
+                
+                <p class="text-center">
+                    Уже есть аккаунт? <a href="{% url 'login' %}">Войдите</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

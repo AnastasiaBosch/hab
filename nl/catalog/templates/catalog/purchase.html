@@ -1,0 +1,68 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>Купить книгу: {{ book.title }}</h1>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4>Информация о книге</h4>
+                    <p><strong>Автор:</strong> {{ book.author }}</p>
+                    <p><strong>Цена:</strong> {{ book.price }} ₽</p>
+                    <p><strong>В наличии:</strong> {{ book.quantity }} шт.</p>
+                    
+                    {% if user_profile %}
+                        <p><strong>Ваша скидка:</strong> {{ user_profile.discount_percent }}%</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Оформление покупки</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="quantity">Количество:</label>
+                            <input type="number" name="quantity" class="form-control" 
+                                   value="1" min="1" max="{{ book.quantity }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label>Способ оплаты:</label><br>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" id="cash1" value="cash" checked>
+                                <label class="form-check-label" for="cash1">
+                                    Наличные при получении
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" id="card1" value="card">
+                                <label class="form-check-label" for="card1">
+                                    Картой при получении
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'book-detail' book.pk %}" class="btn btn-secondary">
+                                Отмена
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                Подтвердить покупку
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

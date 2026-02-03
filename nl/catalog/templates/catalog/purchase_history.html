@@ -1,0 +1,63 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>📋 История покупок</h1>
+    
+    {% if purchases %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Книга</th>
+                    <th>Количество</th>
+                    <th>Цена</th>
+                    <th>Итог</th>
+                    <th>Способ оплаты</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for purchase in purchases %}
+                <tr>
+                    <td>{{ purchase.purchase_date|date:"d.m.Y H:i" }}</td>
+                    <td>
+                        <a href="{% url 'book-detail' purchase.book.pk %}">
+                            {{ purchase.book.title }}
+                        </a>
+                    </td>
+                    <td>{{ purchase.quantity }}</td>
+                    <td>{{ purchase.price }} ₽</td>
+                    <td><strong>{{ purchase.total_price }} ₽</strong></td>
+                    <td>
+                        {% if purchase.payment_method == 'cash' %}
+                            <span class="badge bg-primary">💵 Наличные</span>
+                        {% else %}
+                            <span class="badge bg-success">💳 Картой</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="alert alert-info mt-3">
+        <h5>Всего потрачено: {{ total_spent }} ₽</h5>
+    </div>
+    
+    {% else %}
+    <div class="alert alert-warning text-center py-5">
+        <h3>У вас нет покупок</h3>
+        <p>Совершите первую покупку в нашем магазине!</p>
+        <a href="{% url 'books' %}" class="btn btn-primary">Перейти к книгам</a>
+    </div>
+    {% endif %}
+    
+    <p class="mt-4">
+        <a href="{% url 'profile' %}" class="btn btn-outline-secondary">
+            ← Назад в профиль
+        </a>
+    </p>
+</div>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>📋 Оформление заказа</h1>
+    
+    {% if cart_items %}
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Товары в заказе -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Ваш заказ</h4>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Книга</th>
+                                <th>Количество</th>
+                                <th>Цена</th>
+                                <th>Сумма</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in cart_items %}
+                            <tr>
+                                <td>{{ item.book.title }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.book.price }} ₽</td>
+                                <td>{{ item.total }} ₽</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Способ оплаты -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Способ оплаты</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="payment_method" id="cash" value="cash" checked>
+                            <label class="form-check-label" for="cash">
+                                <strong>💵 Наличные при получении</strong><br>
+                                <small class="text-muted">Оплатите заказ наличными при получении в магазине</small>
+                            </label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="payment_method" id="card" value="card">
+                            <label class="form-check-label" for="card">
+                                <strong>💳 Картой при получении</strong><br>
+                                <small class="text-muted">Оплатите картой при получении в магазине</small>
+                            </label>
+                        </div>
+                        
+                        <hr>
+                        
+                        <!-- Итоговая информация -->
+                        <div class="alert alert-info">
+                            <h5>Итоговая информация:</h5>
+                            <p>Товары: <strong>{{ total_price }} ₽</strong></p>
+                            <p>Ваша скидка: <strong>{{ discount }}% (-{{ discount_amount|floatformat:2 }} ₽)</strong></p>
+                            <h4>К оплате: <strong>{{ final_price|floatformat:2 }} ₽</strong></h4>
+                        </div>
+                        
+                        <!-- Кнопки -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'cart' %}" class="btn btn-secondary">
+                                ← Вернуться в корзину
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                ✅ Подтвердить заказ
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Информация о доставке -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>📦 Информация о получении</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>Адрес магазина:</strong></p>
+                    <p>г. Красноярск, ул. Примерная, д. 123</p>
+                    
+                    <p><strong>График работы:</strong></p>
+                    <p>Ежедневно с 11:00 до 20:00</p>
+                    
+                    <p><strong>Телефон:</strong></p>
+                    <p>+7 (391) 123-45-67</p>
+                    
+                    <div class="alert alert-warning mt-3">
+                        <small>
+                            <strong>⚠️ Важно:</strong><br>
+                            Заказ будет готов к выдаче в течение 1 часа после оформления.<br>
+                            Хранится 3 дня.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <div class="alert alert-warning text-center py-5">
+        <h3>Ваша корзина пуста</h3>
+        <p>Добавьте товары в корзину для оформления заказа</p>
+        <a href="{% url 'books' %}" class="btn btn-primary">Перейти к покупкам</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

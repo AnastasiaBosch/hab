@@ -1,124 +1,83 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-<div class="container">
-    <h1>📋 Оформление заказа</h1>
+<h1>📋 Оформление заказа</h1>
+
+{% if cart_items %}
+<form method="post">
+{% csrf_token %}
+<h3>Ваш заказ:</h3>
+<ul>
+{% for item in cart_items %}
+<li>{{ item.book.title }} - {{ item.quantity }} шт. × {{ item.book.price }} ₽ = {{ item.total }} ₽</li>
+{% endfor %}
+</ul>
+
+<p>Товары: {{ total_price }} ₽</p>
+<p>Ваша скидка: {{ discount }}% (-{{ discount_amount|floatformat:2 }} ₽)</p>
+<p>Сумма без доставки: {{ price_without_delivery|floatformat:2 }} ₽</p>
+
+<h3>Способ оплаты:</h3>
+<input type="radio" name="payment_method" value="cash" checked> Наличные при получении<br>
+<input type="radio" name="payment_method" value="card"> Картой при получении<br><br>
+
+<h3>Способ доставки:</h3>
+<input type="radio" name="delivery_method" value="pickup" checked onclick="calculateTotal()"> 
+<label>Самовывоз - доставка бесплатная</label><br>
+
+<input type="radio" name="delivery_method" value="krasnoyarsk" onclick="calculateTotal()"> 
+<label>Доставка по Красноярску (400 ₽)</label><br>
+<small>Не зависит от общего объёма вашего заказа и фиксирована – 400 ₽, вне зависимости от удалённости вашего района.</small><br><br>
+
+<input type="radio" name="delivery_method" value="russia" onclick="calculateTotal()"> 
+<label>Доставка по России и миру</label><br>
+<small>Стоимость доставки зависит от количества заказанных книг:<br>
+• одна книга – 250 ₽<br>
+• две книги – 300 ₽<br>
+• три книги – 350 ₽<br>
+• и так далее (+50 ₽ за каждую следующую книгу)</small><br>
+
+<p id="delivery_cost" style="display:none; font-weight:bold; color:blue;">Стоимость доставки: <span id="delivery_amount">0</span> ₽</p>
+<p id="total_with_delivery" style="display:none; font-weight:bold; color:green; font-size:1.2em;">Итоговая сумма: <span id="total_amount">{{ price_without_delivery|floatformat:2 }}</span> ₽</p>
+
+<br>
+<button type="submit" class="btn btn-success">Подтвердить заказ</button>
+<a href="{% url 'cart' %}" class="btn btn-secondary">Вернуться в корзину</a>
+</form>
+
+<script>
+// Используем JSON.parse для безопасного преобразования Django переменных
+const totalBooks = JSON.parse('{{ total_books|escapejs }}') || 0;
+const priceWithoutDelivery = JSON.parse('{{ price_without_delivery|floatformat:2|escapejs }}') || 0;
+
+function calculateTotal() {
+    const deliveryMethod = document.querySelector('input[name="delivery_method"]:checked').value;
+    let deliveryCost = 0;
     
-    {% if cart_items %}
-    <div class="row">
-        <div class="col-md-8">
-            <!-- Товары в заказе -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h4>Ваш заказ</h4>
-                </div>
-                <div class="card-body">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Книга</th>
-                                <th>Количество</th>
-                                <th>Цена</th>
-                                <th>Сумма</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in cart_items %}
-                            <tr>
-                                <td>{{ item.book.title }}</td>
-                                <td>{{ item.quantity }}</td>
-                                <td>{{ item.book.price }} ₽</td>
-                                <td>{{ item.total }} ₽</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <!-- Способ оплаты -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h4>Способ оплаты</h4>
-                </div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="radio" name="payment_method" id="cash" value="cash" checked>
-                            <label class="form-check-label" for="cash">
-                                <strong>💵 Наличные при получении</strong><br>
-                                <small class="text-muted">Оплатите заказ наличными при получении в магазине</small>
-                            </label>
-                        </div>
-                        
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="payment_method" id="card" value="card">
-                            <label class="form-check-label" for="card">
-                                <strong>💳 Картой при получении</strong><br>
-                                <small class="text-muted">Оплатите картой при получении в магазине</small>
-                            </label>
-                        </div>
-                        
-                        <hr>
-                        
-                        <!-- Итоговая информация -->
-                        <div class="alert alert-info">
-                            <h5>Итоговая информация:</h5>
-                            <p>Товары: <strong>{{ total_price }} ₽</strong></p>
-                            <p>Ваша скидка: <strong>{{ discount }}% (-{{ discount_amount|floatformat:2 }} ₽)</strong></p>
-                            <h4>К оплате: <strong>{{ final_price|floatformat:2 }} ₽</strong></h4>
-                        </div>
-                        
-                        <!-- Кнопки -->
-                        <div class="d-flex justify-content-between mt-4">
-                            <a href="{% url 'cart' %}" class="btn btn-secondary">
-                                ← Вернуться в корзину
-                            </a>
-                            <button type="submit" class="btn btn-success btn-lg">
-                                ✅ Подтвердить заказ
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4">
-            <!-- Информация о доставке -->
-            <div class="card">
-                <div class="card-header">
-                    <h4>📦 Информация о получении</h4>
-                </div>
-                <div class="card-body">
-                    <p><strong>Адрес магазина:</strong></p>
-                    <p>г. Красноярск, ул. Примерная, д. 123</p>
-                    
-                    <p><strong>График работы:</strong></p>
-                    <p>Ежедневно с 11:00 до 20:00</p>
-                    
-                    <p><strong>Телефон:</strong></p>
-                    <p>+7 (391) 123-45-67</p>
-                    
-                    <div class="alert alert-warning mt-3">
-                        <small>
-                            <strong>⚠️ Важно:</strong><br>
-                            Заказ будет готов к выдаче в течение 1 часа после оформления.<br>
-                            Хранится 3 дня.
-                        </small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    if (deliveryMethod === 'pickup') {
+        deliveryCost = 0;
+    } else if (deliveryMethod === 'krasnoyarsk') {
+        deliveryCost = 400;
+    } else if (deliveryMethod === 'russia') {
+        // 250 за первую книгу, +50 за каждую следующую
+        deliveryCost = 250 + (Math.max(0, totalBooks - 1) * 50);
+    }
     
-    {% else %}
-    <div class="alert alert-warning text-center py-5">
-        <h3>Ваша корзина пуста</h3>
-        <p>Добавьте товары в корзину для оформления заказа</p>
-        <a href="{% url 'books' %}" class="btn btn-primary">Перейти к покупкам</a>
-    </div>
-    {% endif %}
-</div>
+    const totalWithDelivery = priceWithoutDelivery + deliveryCost;
+    
+    document.getElementById('delivery_amount').textContent = deliveryCost;
+    document.getElementById('total_amount').textContent = totalWithDelivery.toFixed(2);
+    document.getElementById('delivery_cost').style.display = 'block';
+    document.getElementById('total_with_delivery').style.display = 'block';
+}
+
+// Рассчитать при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    calculateTotal();
+});
+</script>
+
+{% else %}
+<p>Корзина пуста. <a href="{% url 'books' %}">Выбрать книги</a></p>
+{% endif %}
 {% endblock %}

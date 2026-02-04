@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
+from decimal import Decimal
 
 class Genre(models.Model):
 
@@ -115,6 +116,21 @@ class Purchase(models.Model):
         ('cash', 'Наличные при получении'),
         ('card', 'Картой при получении'),
     ]
+
+    DELIVERY_CHOICES = [
+        ('pickup', 'Самовывоз (бесплатно)'),
+        ('krasnoyarsk', 'Доставка по Красноярску (400 ₽)'),
+        ('russia', 'Доставка по России и миру'),
+    ]
+
+    STATUS_CHOICES = [
+        ('created', '🟡 Создан'),
+        ('assembled', '🟠 Собран'),
+        ('shipped', '🔵 Доставляется'),
+        ('delivered', '🟢 Доставлен'),
+        ('cancelled', '🔴 Отменен'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='purchases')
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1, verbose_name="Количество")
@@ -128,6 +144,26 @@ class Purchase(models.Model):
         verbose_name="Способ оплаты"
     )
 
+    delivery_method = models.CharField(
+        max_length=15,
+        choices=DELIVERY_CHOICES,
+        default='pickup',
+        verbose_name="Способ доставки"
+    )
+
+    delivery_cost = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        verbose_name="Стоимость доставки"
+    )
+    status = models.CharField(
+        max_length=15,
+        choices=STATUS_CHOICES,
+        default='created',
+        verbose_name="Статус заказа"
+    )
+
     class Meta:
         ordering = ['-purchase_date']
         verbose_name = 'Покупка'
@@ -136,14 +172,39 @@ class Purchase(models.Model):
     def __str__(self):
         return f'{self.user.username} - {self.book.title}'
     
+    def get_status_display_with_color(self):
+        """Статус с иконкой"""
+        for code, name in self.STATUS_CHOICES:
+            if code == self.status:
+                return name
+        return self.status
+    
+    def get_delivery_display(self):
+        for code, name in self.DELIVERY_CHOICES:
+            if code == self.delivery_method:
+                return name
+        return self.delivery_method
+    
+    def calculate_delivery_cost(self, total_books=1):
+        if self.delivery_method == 'pickup':
+            return 0
+        elif self.delivery_method == 'krasnoyarsk':
+            return 400
+        elif self.delivery_method == 'russia':
+            return 250 + (max(0, total_books - 1) * 50)
+        return 0
+    
     def save(self, *args, **kwargs):
-        if not self.pk and not hasattr(self, 'payment_method'):
-            self.payment_method = 'cash'
-        
+        if not self.delivery_cost and self.delivery_method:
+            self.delivery_cost = self.calculate_delivery_cost(self.quantity)
+    
         super().save(*args, **kwargs)
-
+        
         user_profile, created = UserProfile.objects.get_or_create(user=self.user)
-        user_profile.total_purchases = sum(
-            purchase.total_price for purchase in self.user.purchases.all()
-        )
+        
+        total = Decimal('0')
+        for purchase in self.user.purchases.exclude(status='cancelled'):
+            total += purchase.total_price + purchase.delivery_cost
+        
+        user_profile.total_purchases = total
         user_profile.save()

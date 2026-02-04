@@ -14,17 +14,13 @@
 
 {% if book.is_available %}
     {% if user.is_authenticated %}
-        <p>
-            <a href="{% url 'add_to_cart' book.pk %}" class="btn btn-primary">
-                В корзину
-            </a>
-            <a href="{% url 'make_purchase' book.pk %}" class="btn btn-success">
-                Купить
-            </a>
-        </p>
-    {% else %}
-        <p><a href="{% url 'login' %}">Войдите, чтобы купить</a></p>
-    {% endif %}
+    <form method="post" action="{% url 'add_to_cart' book.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">
+            Добавить в корзину и купить
+        </button>
+    </form>
+{% endif %}
 {% else %}
     <p>Книга отсутствует</p>
 {% endif %}

@@ -26,13 +26,14 @@
                     <h4>Оформление покупки</h4>
                 </div>
                 <div class="card-body">
-                    <form method="post">
+                    <form method="post" id="purchaseForm">
                         {% csrf_token %}
                         
                         <div class="mb-3">
                             <label for="quantity">Количество:</label>
-                            <input type="number" name="quantity" class="form-control" 
-                                   value="1" min="1" max="{{ book.quantity }}" required>
+                            <input type="number" name="quantity" id="quantity" class="form-control" 
+                                   value="1" min="1" max="{{ book.quantity }}" required
+                                   onchange="calculateDelivery()">
                         </div>
                         
                         <div class="mb-3">
@@ -51,6 +52,42 @@
                             </div>
                         </div>
                         
+                        <div class="mb-3">
+                            <label>Способ доставки:</label><br>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="delivery_method" id="pickup" value="pickup" checked onclick="calculateDelivery()">
+                                <label class="form-check-label" for="pickup">
+                                    Самовывоз (бесплатно)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="delivery_method" id="krasnoyarsk" value="krasnoyarsk" onclick="calculateDelivery()">
+                                <label class="form-check-label" for="krasnoyarsk">
+                                    Доставка по Красноярску (400 ₽)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="delivery_method" id="russia" value="russia" onclick="calculateDelivery()">
+                                <label class="form-check-label" for="russia">
+                                    Доставка по России
+                                </label>
+                                <small class="text-muted d-block">
+                                    • одна книга – 250 ₽<br>
+                                    • две книги – 300 ₽<br>
+                                    • три книги – 350 ₽<br>
+                                    • +50 ₽ за каждую следующую книгу
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info" id="priceSummary">
+                            <h5>Расчет:</h5>
+                            <p id="booksPrice">Товары: {{ book.price }} ₽</p>
+                            <p id="discountInfo">Скидка {{ user_profile.discount_percent|default:0 }}%: -0 ₽</p>
+                            <p id="deliveryInfo">Доставка: 0 ₽</p>
+                            <h5 id="totalPrice">Итог: {{ book.price|floatformat:2 }} ₽</h5>
+                        </div>
+                        
                         <div class="d-flex justify-content-between mt-4">
                             <a href="{% url 'book-detail' book.pk %}" class="btn btn-secondary">
                                 Отмена
@@ -65,4 +102,40 @@
         </div>
     </div>
 </div>
+
+<script>
+// Используем JSON.parse для безопасного преобразования Django переменных
+const bookPrice = JSON.parse('{{ book.price|escapejs }}') || 0;
+const userDiscount = JSON.parse('{{ user_profile.discount_percent|default:"0"|escapejs }}') || 0;
+
+function calculateDelivery() {
+    const quantity = parseInt(document.getElementById('quantity').value) || 1;
+    const deliveryMethod = document.querySelector('input[name="delivery_method"]:checked').value;
+    let deliveryCost = 0;
+    
+    if (deliveryMethod === 'pickup') {
+        deliveryCost = 0;
+    } else if (deliveryMethod === 'krasnoyarsk') {
+        deliveryCost = 400;
+    } else if (deliveryMethod === 'russia') {
+        // 250 за первую книгу, +50 за каждую следующую
+        deliveryCost = 250 + (Math.max(0, quantity - 1) * 50);
+    }
+    
+    const totalPrice = bookPrice * quantity;
+    const discountAmount = totalPrice * userDiscount / 100;
+    const priceAfterDiscount = totalPrice - discountAmount;
+    const finalPrice = priceAfterDiscount + deliveryCost;
+    
+    document.getElementById('booksPrice').textContent = `Товары: ${totalPrice.toFixed(2)} ₽`;
+    document.getElementById('discountInfo').textContent = `Скидка ${userDiscount}%: -${discountAmount.toFixed(2)} ₽`;
+    document.getElementById('deliveryInfo').textContent = `Доставка: ${deliveryCost.toFixed(2)} ₽`;
+    document.getElementById('totalPrice').textContent = `Итог: ${finalPrice.toFixed(2)} ₽`;
+}
+
+// Рассчитать при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    calculateDelivery();
+});
+</script>
 {% endblock %}

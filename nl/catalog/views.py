@@ -125,62 +125,90 @@ def logout_view(request):
     auth_logout(request)
     return redirect('login')
 
-@login_required
-def make_purchase(request, book_id):
-    book = get_object_or_404(Book, id=book_id)
+# @login_required
+# def make_purchase(request, book_id):
+#     """Покупка одной книги (без корзины)"""
+#     book = get_object_or_404(Book, id=book_id)
+ #   
+#     if request.method == 'POST':
+#         quantity = int(request.POST.get('quantity', 1))
+#         payment_method = request.POST.get('payment_method', 'cash')
+#         delivery_method = request.POST.get('delivery_method', 'pickup')
+        
+#         if book.quantity < quantity:
+#             messages.error(request, f'Недостаточно книг на складе. Доступно: {book.quantity}')
+#             return redirect('book-detail', pk=book_id)
+#        
+#         profile = request.user.profile
+#         discount = profile.discount_percent
+#        
+#         total_price = book.price * quantity
+#         discount_amount = total_price * discount / 100
+#        
+#         if delivery_method == 'pickup':
+#             delivery_cost = 0
+#         elif delivery_method == 'krasnoyarsk':
+#             delivery_cost = 400
+#         elif delivery_method == 'russia':
+#             # 250 за первую книгу, +50 за каждую следующую
+#             delivery_cost = 250 + (max(0, quantity - 1) * 50)
+#         else:
+#             delivery_cost = 0
+#         final_price = total_price - discount_amount + delivery_cost
+#        
+#         purchase = Purchase.objects.create(
+#             user=request.user,
+#             book=book,
+#             quantity=quantity,
+#             price=book.price,
+#             total_price=total_price - discount_amount,
+#             payment_method=payment_method,
+#             delivery_method=delivery_method,
+#             delivery_cost=delivery_cost
+#         )
+        
+#         # Уменьшаем количество книг на складе
+#         book.quantity -= quantity
+#         book.save()
+        
+#         # Определяем отображаемое название способа оплаты
+#         payment_display = 'Наличные при получении' if payment_method == 'cash' else 'Картой при получении'
+        
+#         # Определяем отображаемое название способа доставки
+#         delivery_display = {
+#             'pickup': 'Самовывоз (бесплатно)',
+#             'krasnoyarsk': 'Доставка по Красноярску (400 ₽)',
+#             'russia': f'Доставка по России ({delivery_cost} ₽)',
+#         }.get(delivery_method, 'Не указано')
+        
+#         messages.success(
+#             request, 
+#             f'Книга "{book.title}" куплена!<br>'
+#             f'Сумма: {total_price} руб.<br>'
+#             f'Скидка: {discount}% ({discount_amount:.2f} руб.)<br>'
+#             f'Доставка: {delivery_cost} руб.<br>'
+#             f'Итог: {final_price:.2f} руб.<br>'
+#             f'Способ оплаты: {payment_display}<br>'
+#             f'Способ доставки: {delivery_display}'
+#         )
+        
+#         return redirect('profile')
     
-    if request.method == 'POST':
-        quantity = int(request.POST.get('quantity', 1))
-        payment_method = request.POST.get('payment_method', 'cash')
-        
-        if book.quantity < quantity:
-            messages.error(request, f'Недостаточно книг на складе. Доступно: {book.quantity}')
-            return redirect('book-detail', pk=book_id)
-        
-        profile = request.user.profile
-        discount = profile.discount_percent
-        
-        total_price = book.price * quantity
-        discount_amount = total_price * discount / 100
-        final_price = total_price - discount_amount
-        
-        purchase = Purchase.objects.create(
-            user=request.user,
-            book=book,
-            quantity=quantity,
-            price=book.price,
-            total_price=final_price,
-            payment_method=payment_method
-        )
-        
-        book.quantity -= quantity
-        book.save()
-        
-        payment_display = 'Наличные при получении' if payment_method == 'cash' else 'Картой при получении'
-        
-        messages.success(
-            request, 
-            f'Книга "{book.title}" куплена!<br>'
-            f'Сумма: {total_price} руб.<br>'
-            f'Скидка: {discount}% ({discount_amount:.2f} руб.)<br>'
-            f'Итог: {final_price:.2f} руб.<br>'
-            f'Способ оплаты: {payment_display}'
-        )
-        
-        return redirect('profile')
-    
-    return render(request, 'catalog/purchase.html', {
-        'book': book,
-        'user_profile': request.user.profile
-    })
+#     # Если GET запрос, показываем страницу оформления
+#     return render(request, 'catalog/purchase.html', {
+#         'book': book,
+#         'user_profile': request.user.profile
+#     })
 
 @login_required
 def purchase_history(request):
     """История покупок пользователя"""
     purchases = Purchase.objects.filter(user=request.user).order_by('-purchase_date')
+    total_spent = sum(p.total_price for p in purchases)
+    
     return render(request, 'catalog/purchase_history.html', {
         'purchases': purchases,
-        'total_spent': sum(p.total_price for p in purchases)
+        'total_spent': total_spent,
     })
 
 def cart_view(request):
@@ -263,6 +291,8 @@ def checkout(request):
     
     if request.method == 'POST':
         payment_method = request.POST.get('payment_method', 'cash')
+        delivery_method = request.POST.get('delivery_method', 'pickup')
+        
         unavailable_items = []
         for book_id_str, quantity in cart.items():
             book_id = int(book_id_str)
@@ -275,51 +305,93 @@ def checkout(request):
             messages.error(request, f'Нет в наличии: {", ".join(unavailable_items)}')
             return redirect('cart')
         
-        total_spent = 0
+        total_books = sum(cart.values())
+        total_price = Decimal('0')
+        cart_items = []
+        
         for book_id_str, quantity in cart.items():
             book_id = int(book_id_str)
             book = get_object_or_404(Book, id=book_id)
+            item_total = book.price * quantity
+            cart_items.append({
+                'book': book,
+                'quantity': quantity,
+                'total': item_total
+            })
+            total_price += item_total
+        
+        profile = request.user.profile
+        discount = profile.discount_percent
+        
+        if delivery_method == 'pickup':
+            delivery_cost = Decimal('0')
+        elif delivery_method == 'krasnoyarsk':
+            delivery_cost = Decimal('400')
+        elif delivery_method == 'russia':
+            delivery_cost = Decimal('250') + (max(0, total_books - 1) * Decimal('50'))
+        else:
+            delivery_cost = Decimal('0')
+        
+        discount_amount = total_price * Decimal(discount) / Decimal('100')
+        final_price = total_price - discount_amount + delivery_cost
+        
+        total_spent = Decimal('0')
+        for book_id_str, quantity in cart.items():
+            book_id = int(book_id_str)
+            book = get_object_or_404(Book, id=book_id)
+        
+            item_total = book.price * quantity
+            item_discount = item_total * Decimal(discount) / Decimal('100')
+            item_final_price = item_total - item_discount
             
-            profile = request.user.profile
-            discount = profile.discount_percent
-            
-            total_price = book.price * quantity
-            discount_amount = total_price * discount / 100
-            final_price = total_price - discount_amount
+            item_delivery_cost = (Decimal(quantity) / Decimal(total_books)) * delivery_cost if total_books > 0 else Decimal('0')
             
             Purchase.objects.create(
                 user=request.user,
                 book=book,
                 quantity=quantity,
                 price=book.price,
-                total_price=final_price,
-                payment_method=payment_method
+                total_price=item_final_price,
+                payment_method=payment_method,
+                delivery_method=delivery_method,
+                delivery_cost=item_delivery_cost,
+                status='created'  
             )
-            
-
             book.quantity -= quantity
             book.save()
             
-            total_spent += final_price
+            total_spent += item_final_price + item_delivery_cost
         
         cart_items_count = len(cart)
         request.session['cart'] = {}
-        
+
         payment_display = 'Наличные при получении' if payment_method == 'cash' else 'Картой при получении'
+
+        delivery_display = {
+            'pickup': 'Самовывоз (бесплатно)',
+            'krasnoyarsk': 'Доставка по Красноярску (400 ₽)',
+            'russia': f'Доставка по России ({delivery_cost} ₽)',
+        }.get(delivery_method, 'Не указано')
         
         messages.success(
             request, 
-            f'✅ Заказ оформлен!<br>'
+            f'✅ Заказ оформлен! Статус: 🟡 Создан<br>'
             f'Количество товаров: {cart_items_count}<br>'
-            f'Сумма: {total_spent:.2f} руб.<br>'
+            f'Товары: {total_price} руб.<br>'
+            f'Скидка: {discount}% ({discount_amount:.2f} руб.)<br>'
+            f'Доставка: {delivery_cost} руб.<br>'
+            f'Итог: {final_price:.2f} руб.<br>'
             f'Способ оплаты: {payment_display}<br>'
+            f'Способ доставки: {delivery_display}<br>'
             f'Вы можете забрать заказ в магазине.'
         )
         
         return redirect('profile')
     
-    total_price = 0
+    # Если GET запрос, показываем страницу оформления заказа
+    total_price = Decimal('0')
     cart_items = []
+    total_books = 0
     
     for book_id_str, quantity in cart.items():
         book_id = int(book_id_str)
@@ -331,16 +403,18 @@ def checkout(request):
             'total': item_total
         })
         total_price += item_total
-
+        total_books += quantity
+    
     profile = request.user.profile
     discount = profile.discount_percent
-    discount_amount = total_price * discount / 100
-    final_price = total_price - discount_amount
+    discount_amount = total_price * Decimal(discount) / Decimal('100')
+    price_without_delivery = total_price - discount_amount
     
     return render(request, 'catalog/checkout.html', {
         'cart_items': cart_items,
-        'total_price': total_price,
+        'total_price': float(total_price),  
+        'total_books': total_books,
         'discount': discount,
-        'discount_amount': discount_amount,
-        'final_price': final_price
+        'discount_amount': float(discount_amount),
+        'price_without_delivery': float(price_without_delivery),
     })

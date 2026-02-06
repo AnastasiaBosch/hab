@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect,  get_object_or_404
-from .models import Book, Author, Genre, News, UserProfile, Book, Purchase
+from .models import Book, Author, Genre, News, UserProfile, Purchase
 from django.views import generic
 from .filters import BookFilter
 from django.db.models import Q

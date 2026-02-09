@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Книжный магазин «Бакен»</title>
     
-    <link rel="stylesheet" href="">
+    <link rel="icon" href="\css\img\delivery.svg">
     <link rel="stylesheet" href="">
   </head>
   <body>
@@ -30,38 +30,3 @@
 
 
 
-{% extends "base_generic.html" %}
-
-{% block content %}
-
-<div class="jumbotron">
-  <h1>Добро пожаловать в Book Store!</h1>
-  <p>Лучший онлайн-магазин книг с широким ассортиментом и выгодными ценами.</p>
-</div>
-
-<div class="row">
-  <div class="col-md-12">
-    <div class="panel panel-primary">
-      <div class="panel-heading">
-        <h3 class="panel-title">Последние новости магазина</h3>
-      </div>
-      <div class="panel-body">
-        {% if news_list %}
-          {% for news in news_list %}
-            <div class="news-item" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
-              <h4><a href="{% url 'news-detail' news.pk %}">{{ news.title }}</a></h4>
-              <p>{{ news.content|truncatewords:50 }}</p>
-              <small class="text-muted">
-                Опубликовано: {{ news.published_date|date:"d.m.Y H:i" }}
-              </small>
-            </div>
-          {% endfor %}
-          <a href="{% url 'news' %}" class="btn btn-default">Все новости</a>
-        {% else %}
-          <p>Пока нет новостей.</p>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-</div>
-{% endblock %}

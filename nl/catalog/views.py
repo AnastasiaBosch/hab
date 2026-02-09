@@ -4,6 +4,7 @@ from django.views import generic
 from .filters import BookFilter
 from django.db.models import Q
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
@@ -101,16 +102,44 @@ class AuthorDetailView(generic.DetailView):
 
 def register(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f'Аккаунт создан для {username}! Теперь вы можете войти.')
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+        
+        if password1 != password2:
+            messages.error(request, 'Пароли не совпадают')
+            return render(request, 'catalog/registration/register.html')
+
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Пользователь с таким email уже существует')
+            return render(request, 'catalog/registration/register.html')
+        
+        try:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password1,
+                first_name=first_name,
+                last_name=last_name
+            )
+            
+            UserProfile.objects.create(user=user)
+            
+            messages.success(
+                request, 
+                f'Аккаунт создан для {username}! Теперь вы можете войти.'
+            )
             return redirect('login')
-    else:
-        form = UserCreationForm()
+            
+        except Exception as e:
+            messages.error(request, f'Ошибка при создании пользователя: {str(e)}')
+            return render(request, 'catalog/registration/register.html')
     
-    return render(request, 'catalog/registration/register.html', {'form': form})
+    # Если GET запрос
+    return render(request, 'catalog/registration/register.html')
 
 @login_required
 def profile(request):

@@ -19,11 +19,21 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 from django.conf.urls.static import static
 from django.conf import settings
+from catalog import views
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('', views.index, name='index'),
+    path('news/', views.NewsListView.as_view(), name='news'),
+    path('news/<int:pk>/', views.NewsDetailView.as_view(), name='news-detail'),
+    path('books/', views.BookListView.as_view(), name='books'),
+    path('book/<int:pk>/', views.BookDetailView.as_view(), name='book-detail'),
+    path('cart/', views.cart_view, name='cart'),
+    path('profile/', views.profile, name='profile'),
+    path('faq/', views.faq_view, name='faq'),
+    path('login/', auth_views.LoginView.as_view(), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('catalog/', include('catalog.urls')),
-    path('', RedirectView.as_view(url='/catalog/', permanent=True)),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -18,25 +18,11 @@ def index(request):
     """
     Функция отображения для домашней страницы сайта.
     """
-    num_books=Book.objects.all().count()
-    num_authors=Author.objects.count()  # Метод 'all()' применён по умолчанию.
-    num_genres = Genre.objects.count()
-    num_news = News.objects.filter(is_published=True).count()
-
-    news_list = News.objects.filter(is_published=True).order_by('-published_date')[:5]
-     
-    # Отрисовка HTML-шаблона index.html с данными внутри
-    return render(
-        request,
-        'index.html',
-        context={
-            'num_books': num_books,
-            'num_authors': num_authors,
-            'num_genres': num_genres,
-            'num_news': num_news,
-            'news_list': news_list,
-        }
-    )
+    news_list = News.objects.all().order_by('-published_date')[:5]
+    context = {
+        'news_list': news_list,
+    }
+    return render(request, 'index.html', context)
 
 class BookListView(generic.ListView):
     model = Book
@@ -157,6 +143,10 @@ def profile(request):
 def logout_view(request):
     auth_logout(request)
     return redirect('login')
+
+def faq_view(request):
+    """FAQ page"""
+    return render(request, 'catalog/faq.html')
 
 # @login_required
 # def make_purchase(request, book_id):

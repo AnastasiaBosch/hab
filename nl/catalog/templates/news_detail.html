@@ -1,0 +1,23 @@
+{% extends "base_generic.html" %}
+
+{% block title %}{{ news.title }} — Книжный магазин «Бакен»{% endblock %}
+
+{% block meta %}
+<meta name="description" content="{{ news.content|truncatewords:30|striptags }}">
+{% endblock %}
+
+{% block content %}
+<div class="news-container">
+    <article class="news-article">
+        <span class="date_added">{{ news.published_date|date:"d E Y г." }}</span>
+        <h1 style="font-size: 26px; margin-bottom: 20px;">{{ news.title }}</h1>
+        <div class="article-content">
+            {{ news.content|safe }}
+        </div>
+    </article>
+
+    <div style="margin-top: 20px;">
+        <a href="{% url 'news' %}" style="display: inline-block; padding: 10px 20px; background: #f5f5f5; border-radius: 4px; text-decoration: none;">← Все новости</a>
+    </div>
+</div>
+{% endblock %}

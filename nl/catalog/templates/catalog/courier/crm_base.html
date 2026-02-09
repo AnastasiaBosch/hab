@@ -1,0 +1,19 @@
+{% extends "catalog/crm_base.html" %}
+
+{% block title %}CRM Курьера{% endblock %}
+
+{% block content %}
+<!-- Переопределяем навигацию для курьера -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Меняем ссылку в навигации для курьера
+        const navBrand = document.querySelector('.navbar-brand');
+        if (navBrand) {
+            navBrand.href = "{% url 'courier_orders' %}";
+        }
+    });
+</script>
+
+<!-- Основной контент -->
+{{ block.super }}
+{% endblock %}

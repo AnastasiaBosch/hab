@@ -26,6 +26,23 @@ urlpatterns = [
     path('cart/update/<int:book_id>/', views.update_cart_quantity, name='update_cart_quantity'),
     path('cart/checkout/', views.checkout, name='checkout'),
     path('cart/clear/', views.clear_cart, name='clear_cart'),
+    path('purchase-history/', views.purchase_history, name='purchase_history'),
+    path('crm/login/', auth_views.LoginView.as_view(
+        template_name='catalog/registration/crm_login.html',
+        redirect_authenticated_user=True
+    ), name='crm_login'),
+    path('crm/staff/', views.StaffDashboardView.as_view(), name='staff_dashboard'),
+    path('crm/staff/orders/', views.ManageOrdersView.as_view(), name='staff_orders'),
+    path('crm/staff/order/<int:pk>/update/', views.UpdateOrderStatusView.as_view(), name='update_order_status'),
+    path('crm/staff/books/', views.ManageBooksView.as_view(), name='staff_books'),
+    path('crm/staff/book/add/', views.AddBookView.as_view(), name='add_book'),
+    path('crm/staff/book/<int:pk>/edit/', views.EditBookView.as_view(), name='edit_book'),
+    path('crm/staff/customer/<int:user_id>/orders/', views.CustomerOrdersView.as_view(), name='customer_orders'),
+    path('crm/staff/news/', views.ManageNewsView.as_view(), name='staff_news'),
+    path('crm/staff/news/add/', views.AddNewsView.as_view(), name='add_news'),
+    path('crm/staff/news/<int:pk>/edit/', views.EditNewsView.as_view(), name='edit_news'),
+    path('crm/courier/', views.CourierOrdersView.as_view(), name='courier_orders'),
+    path('crm/courier/order/<int:pk>/update/', views.CourierUpdateStatusView.as_view(), name='courier_update_status'),
 ]
 
 if settings.DEBUG:

@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect,  get_object_or_404
+from django.shortcuts import render, redirect,  get_object_or_404, reverse
 from .models import Book, Author, Genre, News, UserProfile, Book, Purchase
 from django.views import generic
 from .filters import BookFilter
@@ -9,6 +9,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
 from decimal import Decimal
+from .mixins import SimpleRoleMixin
+from django.views.generic import ListView, UpdateView, CreateView, TemplateView
+from django.db.models import Sum, Count
+import datetime
 
 def index(request):
     """
@@ -447,3 +451,229 @@ def checkout(request):
         'discount_amount': float(discount_amount),
         'price_without_delivery': float(price_without_delivery),
     })
+
+class StaffDashboardView(SimpleRoleMixin, TemplateView):
+    """Главная панель сотрудника"""
+    template_name = 'catalog/staff/dashboard.html'
+    allowed_roles = ['staff']
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        today = datetime.date.today()
+        today_orders = Purchase.objects.filter(
+            purchase_date__date=today
+        )
+        
+        low_stock = Book.objects.filter(quantity__lt=3)
+        
+        context.update({
+            'today_orders_count': today_orders.count(),
+            'today_revenue': sum(o.total_price for o in today_orders),
+            'low_stock': low_stock,
+            'total_books': Book.objects.count(),
+            'active_orders': Purchase.objects.exclude(
+                status__in=['delivered', 'cancelled']
+            ).count(),
+        })
+        
+        return context
+
+class ManageOrdersView(SimpleRoleMixin, ListView):
+    """Управление заказами"""
+    model = Purchase
+    template_name = 'catalog/staff/orders.html'
+    context_object_name = 'orders'
+    allowed_roles = ['staff']
+    paginate_by = 20
+    
+    def get_queryset(self):
+        status = self.request.GET.get('status', '')
+        queryset = Purchase.objects.all().order_by('-purchase_date')
+        
+        if status:
+            queryset = queryset.filter(status=status)
+        
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['status_filter'] = self.request.GET.get('status', '')
+        context['status_choices'] = Purchase.STATUS_CHOICES 
+        return context
+
+class UpdateOrderStatusView(SimpleRoleMixin, UpdateView):
+    """Изменение статуса заказа (для сотрудника)"""
+    model = Purchase
+    template_name = 'catalog/staff/update_order_status.html'
+    fields = ['status']
+    allowed_roles = ['staff']
+    
+    def form_valid(self, form):
+        form.instance.status_changed_by = self.request.user
+        messages.success(self.request, f'Статус заказа #{self.object.id} обновлен')
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse('staff_orders')
+
+class ManageBooksView(SimpleRoleMixin, ListView):
+    """Управление книгами"""
+    model = Book
+    template_name = 'catalog/staff/books.html'
+    context_object_name = 'books'
+    allowed_roles = ['staff']
+    paginate_by = 20
+    
+    def get_queryset(self):
+        queryset = Book.objects.all().order_by('title')
+        genre_id = self.request.GET.get('genre')
+        if genre_id:
+            queryset = queryset.filter(genre__id=genre_id)
+        
+        available = self.request.GET.get('available')
+        if available == 'yes':
+            queryset = queryset.filter(quantity__gt=0)
+        elif available == 'no':
+            queryset = queryset.filter(quantity=0)
+        
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['genres'] = Genre.objects.all()
+        context['genre_filter'] = self.request.GET.get('genre', '')
+        context['available_filter'] = self.request.GET.get('available', '')
+        return context
+
+class EditBookView(SimpleRoleMixin, UpdateView):
+    """Редактирование книги"""
+    model = Book
+    template_name = 'catalog/staff/edit_book.html'
+    fields = ['title', 'author', 'summary', 'genre', 'price', 'quantity']
+    allowed_roles = ['staff']
+    
+    def form_valid(self, form):
+        form.instance.last_updated_by = self.request.user
+        messages.success(self.request, f'Книга "{form.instance.title}" обновлена')
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse('staff_books')
+
+class AddBookView(SimpleRoleMixin, CreateView):
+    """Добавление новой книги"""
+    model = Book
+    template_name = 'catalog/staff/add_book.html'
+    fields = ['title', 'author', 'summary', 'genre', 'price', 'quantity', 'avatar']
+    allowed_roles = ['staff']
+    
+    def form_valid(self, form):
+        form.instance.last_updated_by = self.request.user
+        messages.success(self.request, f'Книга "{form.instance.title}" добавлена')
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse('staff_books')
+
+class CustomerOrdersView(SimpleRoleMixin, ListView):
+    """Заказы конкретного покупателя"""
+    model = Purchase
+    template_name = 'catalog/staff/customer_orders.html'
+    allowed_roles = ['staff']
+    
+    def get_queryset(self):
+        user_id = self.kwargs.get('user_id')
+        return Purchase.objects.filter(user_id=user_id).order_by('-purchase_date')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_id = self.kwargs.get('user_id')
+        context['customer'] = User.objects.get(id=user_id)
+        return context
+
+class CourierOrdersView(SimpleRoleMixin, ListView):
+    """Заказы для курьера - только те, что нужно доставлять"""
+    model = Purchase
+    template_name = 'catalog/courier/orders.html'
+    context_object_name = 'orders'
+    allowed_roles = ['courier', 'staff']
+    
+    def get_queryset(self):
+        return Purchase.objects.filter(
+            status__in=['assembled', 'shipped'],
+            delivery_method__in=['krasnoyarsk', 'russia']
+        ).order_by('-purchase_date')
+
+class CourierUpdateStatusView(SimpleRoleMixin, UpdateView):
+    """Курьер меняет статус доставки"""
+    model = Purchase
+    template_name = 'catalog/courier/update_status.html'
+    fields = ['status']
+    allowed_roles = ['courier', 'staff'] 
+    
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        status_choices = []
+        
+        if self.object.status == 'assembled':
+            status_choices = [('shipped', '🔵 Доставляется')]
+        elif self.object.status == 'shipped':
+            status_choices = [('delivered', '🟢 Доставлен')]
+        
+        form.fields['status'].choices = status_choices
+        return form
+    
+    def form_valid(self, form):
+        old_status = self.object.status
+        response = super().form_valid(form)
+
+        if form.instance.status == 'delivered' and old_status != 'delivered':
+            form.instance.book.sold_count += form.instance.quantity
+            form.instance.book.save()
+            messages.success(self.request, f'✅ Книга "{form.instance.book.title}" отмечена как доставленная')
+        
+        messages.success(self.request, f'Статус заказа #{self.object.id} обновлен')
+        return response
+    
+    def get_success_url(self):
+        return reverse('courier_orders')
+
+class ManageNewsView(SimpleRoleMixin, ListView):
+    """Управление новостями"""
+    model = News
+    template_name = 'catalog/staff/news.html'
+    context_object_name = 'news_list'
+    allowed_roles = ['staff']
+    
+    def get_queryset(self):
+        return News.objects.all().order_by('-published_date')
+
+class AddNewsView(SimpleRoleMixin, CreateView):
+    """Добавление новости"""
+    model = News
+    template_name = 'catalog/staff/add_news.html'
+    fields = ['title', 'content', 'is_published']
+    allowed_roles = ['staff']
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Новость добавлена')
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse('staff_news')
+
+class EditNewsView(SimpleRoleMixin, UpdateView):
+    """Редактирование новости"""
+    model = News
+    template_name = 'catalog/staff/edit_news.html'
+    fields = ['title', 'content', 'is_published']
+    allowed_roles = ['staff']
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Новость обновлена')
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse('staff_news')
+    

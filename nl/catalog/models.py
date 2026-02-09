@@ -18,6 +18,7 @@ class Book(models.Model):
     genre = models.ManyToManyField(Genre, help_text="Select a genre for this book")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена", default=0)
     quantity = models.PositiveIntegerField(default=0, verbose_name="Количество на складе")
+    sold_count = models.PositiveIntegerField(default=0, verbose_name="Количество проданных копий")
     
     class Meta:
         ordering = ['title']
@@ -208,3 +209,28 @@ class Purchase(models.Model):
         
         user_profile.total_purchases = total
         user_profile.save()
+
+class UserRole(models.Model):
+    ROLE_CHOICES = [
+        ('courier', 'Курьер'),
+        ('staff', 'Сотрудник магазина'),
+        ('customer', 'Покупатель'),
+    ]
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='role')
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='customer')
+    
+    class Meta:
+        verbose_name = 'Роль пользователя'
+        verbose_name_plural = 'Роли пользователей'
+    
+    def __str__(self):
+        return f'{self.user.username} - {self.get_role_display()}'
+    
+    @property
+    def is_courier(self):
+        return self.role == 'courier'
+    
+    @property
+    def is_staff(self):
+        return self.role == 'staff'

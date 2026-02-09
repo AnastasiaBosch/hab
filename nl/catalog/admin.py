@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Author, Genre, Book, News, UserProfile, Purchase
-
+from .models import UserRole
 
 admin.site.register(Genre)
 
@@ -63,4 +63,20 @@ class PurchaseAdmin(admin.ModelAdmin):
                     obj.book.quantity -= obj.quantity
                     obj.book.save()
         
+        super().save_model(request, obj, form, change)
+
+@admin.register(UserRole)
+class UserRoleAdmin(admin.ModelAdmin):
+    list_display = ('user', 'role', 'user_email')
+    list_filter = ('role',)
+    search_fields = ('user__username', 'user__email')
+    
+    def user_email(self, obj):
+        return obj.user.email
+    user_email.short_description = 'Email'
+    
+    def save_model(self, request, obj, form, change):
+        if obj.role == 'staff' and not obj.user.is_staff:
+            obj.user.is_staff = True
+            obj.user.save()
         super().save_model(request, obj, form, change)

@@ -7,13 +7,11 @@ def get_list(value, arg):
     """Получить список значений GET-параметра"""
     return value.getlist(arg)
 
-# Добавьте этот фильтр для подсчета статусов
 @register.filter
 def status_count(queryset, status_code):
     """Подсчет количества записей с определенным статусом"""
     return queryset.filter(status=status_code).count()
 
-# Добавьте другие фильтры, если нужно
 @register.filter
 def sum_delivery(queryset):
     """Сумма стоимости доставки"""

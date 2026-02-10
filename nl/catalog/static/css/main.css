@@ -37,22 +37,16 @@ a:hover {
    HEADER (ШАПКА)
    =========================== */
 
-.site-header {
-  background-image: url('../images/header.png');
-  background-repeat: no-repeat;
-  background-position: center top;
-  background-size: contain;
-  height: 300px;
-  position: relative;
-}
+
 
 .logo-area {
   float: left;
   width: 230px;
+  min-height: 120px;
 }
 
 .logo-link {
-  height: 310px;
+  height: 100%;
   width: 100%;
   display: block;
   text-decoration: none;
@@ -60,30 +54,37 @@ a:hover {
 
 .header-content {
   margin-left: 0;
-  padding: 90px 0 0 0;
-  float: left;
-  width: 700px;
-  font-size: 16px;
+  padding: 20px 20px 0 0;
+  float: right;
+  width: calc(100% - 250px);
+  font-size: 14px;
   text-align: right;
 }
 
 .address-info {
-  line-height: 1.5;
-  margin-bottom: 10px;
+  line-height: 1.4;
+  margin-bottom: 15px;
+  font-size: 13px;
+  color: #666;
 }
 
 /* ===========================
    КНОПКА ВХОДА
    =========================== */
 
+.login-section {
+  margin-bottom: 15px;
+  text-align: right;
+}
+
 .login-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: #333;
   color: white;
-  padding: 6px 14px;
-  border-radius: 20px;
+  padding: 8px 16px;
+  border-radius: 4px;
   text-decoration: none;
   font-size: 13px;
   cursor: pointer;
@@ -93,6 +94,7 @@ a:hover {
 .login-btn:hover {
   background: #555;
   color: white;
+  text-decoration: none;
 }
 
 /* ===========================
@@ -173,9 +175,14 @@ a:hover {
    ОСНОВНОЙ КОНТЕНТ
    =========================== */
 
+/* ===========================
+   ОСНОВНОЙ КОНТЕНТ
+   =========================== */
+
 .main-content {
   clear: both;
   margin-top: 30px;
+  min-height: 400px;
 }
 
 .page-header {
@@ -183,6 +190,8 @@ a:hover {
   margin-bottom: 30px;
   margin-top: 0;
   padding-top: 0;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 15px;
 }
 
 .page-header h1 {
@@ -193,10 +202,10 @@ a:hover {
 }
 
 .page-header .subtitle {
-  font-size: 16px;
-  color: #666;
+  font-size: 14px;
+  color: #888;
   font-style: italic;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 /* ===========================
@@ -468,6 +477,10 @@ a:hover {
    ДОПОЛНИТЕЛЬНЫЕ УТИЛИТЫ
    =========================== */
 
+/* ===========================
+   ДОПОЛНИТЕЛЬНЫЕ УТИЛИТЫ
+   =========================== */
+
 .clearfix::after {
   content: "";
   display: table;
@@ -484,3 +497,230 @@ a:hover {
 .mb-1 { margin-bottom: 10px; }
 .mb-2 { margin-bottom: 20px; }
 .mb-3 { margin-bottom: 30px; }
+
+/* ===========================
+   ФОРМ И ВВОД
+   =========================== */
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+textarea,
+select {
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s;
+  background: #fff;
+  width: 100%;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #333;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+button,
+input[type="submit"],
+input[type="button"],
+.btn {
+  background: #333;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+  font-family: inherit;
+}
+
+button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover,
+.btn:hover {
+  background: #555;
+}
+
+button:active,
+input[type="submit"]:active,
+input[type="button"]:active,
+.btn:active {
+  background: #222;
+}
+
+button:disabled,
+input[type="submit"]:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* ===========================
+   ЧЕКБОКСЫ И РАДИО КНОПКИ
+   =========================== */
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  margin-right: 8px;
+  accent-color: #333;
+}
+
+input[type="checkbox"]:focus,
+input[type="radio"]:focus {
+  outline: 2px solid #333;
+  outline-offset: 2px;
+}
+
+/* ===========================
+   ТАБЛИЦЫ (КОРЗИНА)
+   =========================== */
+
+.cart-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+}
+
+.cart-table thead {
+  background: #f8f8f8;
+  border-bottom: 2px solid #ddd;
+}
+
+.cart-table th {
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  font-size: 13px;
+}
+
+.cart-table td {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.cart-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.cart-summary {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f8f8;
+  border-radius: 4px;
+  gap: 30px;
+}
+
+.cart-summary-item {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.cart-summary-label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.cart-summary-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.cart-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.cart-empty-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+  color: #ddd;
+}
+
+.cart-empty-text {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+/* ===========================
+   ПРОФИЛЬ И ЛИЧНЫЙ КАБИНЕТ
+   =========================== */
+
+.profile-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.profile-header {
+  padding: 20px;
+  background: #f8f8f8;
+  border-radius: 4px;
+  margin-bottom: 30px;
+}
+
+.profile-info-group {
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.profile-info-label {
+  font-size: 13px;
+  color: #999;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.profile-info-value {
+  font-size: 16px;
+  color: #333;
+}

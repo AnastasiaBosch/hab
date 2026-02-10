@@ -3,34 +3,321 @@
 {% block title %}Каталог книг — Книжный магазин «Бакен»{% endblock %}
 
 {% block meta %}
-<meta name="description" content="Каталог книг книжного магазина Бакен. Широкий выбор книг с доставкой.">
+<meta name="description" content="Каталог книг Бакена. Широкий выбор книг с доставкой по всему миру.">
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .search-box {
+        background: #f8f8f8;
+        padding: 20px;
+        border-radius: 4px;
+        margin-bottom: 25px;
+    }
+
+    .search-box form {
+        display: flex;
+        gap: 10px;
+    }
+
+    .search-box input {
+        flex: 1;
+        padding: 12px 14px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: #333;
+        box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-box {
+        background: #f8f8f8;
+        padding: 20px;
+        border-radius: 4px;
+        margin-bottom: 25px;
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .filter-group label {
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #666;
+    }
+
+    .filter-group select,
+    .filter-group input[type="checkbox"] {
+        font-size: 14px;
+    }
+
+    .filter-group select {
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .filter-group input[type="checkbox"] {
+        cursor: pointer;
+        width: 18px;
+        height: 18px;
+        margin-right: 8px;
+        accent-color: #333;
+    }
+
+    .filter-group input[type="checkbox"] + label {
+        display: inline-block;
+        text-transform: none;
+        font-weight: normal;
+        color: #333;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .books-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .book-card {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        padding: 15px;
+        transition: all 0.2s;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .book-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-color: #ddd;
+    }
+
+    .book-cover {
+        width: 100%;
+        height: 200px;
+        background: #f5f5f5;
+        border-radius: 4px;
+        margin-bottom: 12px;
+        overflow: hidden;
+    }
+
+    .book-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .book-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        line-height: 1.3;
+        flex: 1;
+    }
+
+    .book-title a {
+        color: #333;
+        text-decoration: none;
+    }
+
+    .book-title a:hover {
+        color: #000;
+        text-decoration: underline;
+    }
+
+    .book-author {
+        font-size: 12px;
+        color: #999;
+        margin-bottom: 10px;
+    }
+
+    .book-price {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 12px;
+    }
+
+    .book-availability {
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 4px;
+        margin-bottom: 12px;
+    }
+
+    .book-availability.available {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .book-availability.unavailable {
+        background: #ffebee;
+        color: #c62828;
+    }
+
+    .book-card .btn {
+        margin-top: auto;
+        width: 100%;
+        padding: 10px;
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .books-grid {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .filter-box {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .books-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .search-box form {
+            flex-direction: column;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="news-container">
     <div class="page-header">
         <h1>Каталог книг</h1>
-        <div class="subtitle">Лучшие книги с доставкой по всему миру</div>
+        <div class="subtitle">Найдите интересующую вас книгу</div>
     </div>
 
+    <!-- Поисковая строка -->
+    <div class="search-box">
+        <form method="get">
+            <input type="text" 
+                   name="search" 
+                   placeholder="Поиск по названию или автору..."
+                   value="{{ search_query }}"
+                   required>
+            <button type="submit" class="btn">Поиск</button>
+        </form>
+    </div>
+
+    <!-- Информация о поиске -->
+    {% if search_query %}
+        <div style="background: #f0f7ff; border: 1px solid #b3d9ff; border-radius: 4px; padding: 12px 15px; margin-bottom: 20px; color: #0066cc; font-size: 14px;">
+            Результаты поиска по запросу: <strong>"{{ search_query }}"</strong> 
+            {% if book_list.count == 0 %}
+                — ничего не найдено
+            {% else %}
+                — найдено {{ book_list.count }}
+            {% endif %}
+            <a href="{% url 'books' %}" style="margin-left: 15px; color: #0066cc;">Сбросить поиск</a>
+        </div>
+    {% endif %}
+
+    <!-- Форма фильтрации -->
+    <div class="filter-box">
+        <form method="get" style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-end; width: 100%;">
+            {% if search_query %}
+                <input type="hidden" name="search" value="{{ search_query }}">
+            {% endif %}
+            
+            <div class="filter-group">
+                <label for="genre">Жанр:</label>
+                <select name="genre" id="genre">
+                    <option value="">Все жанры</option>
+                    {% for genre in genres %}
+                        <option value="{{ genre.id }}" 
+                            {% if request.GET.genre == genre.id|stringformat:"i" %}selected{% endif %}>
+                            {{ genre.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="is_available">Наличие:</label>
+                <div style="display: flex; align-items: center;">
+                    <input type="checkbox" id="is_available" name="is_available" value="1" 
+                        {% if request.GET.is_available %}checked{% endif %}>
+                    <label for="is_available" style="display: inline; text-transform: none; font-weight: normal; cursor: pointer; margin: 0;">
+                        Только в наличии
+                    </label>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn">Фильтр</button>
+            
+            {% if request.GET.genre or request.GET.is_available %}
+                <a href="{% url 'books' %}{% if search_query %}?search={{ search_query }}{% endif %}" class="btn" style="background: #f0f0f0; color: #333;">Сбросить</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Список книг сеткой -->
     {% if book_list %}
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-top: 30px;">
+        <div class="books-grid">
             {% for book in book_list %}
-                <div class="news-article" style="padding: 15px;">
+                <div class="book-card">
                     {% if book.cover %}
-                        <div style="text-align: center; margin-bottom: 15px;">
-                            <img src="{{ book.cover.url }}" alt="{{ book.title }}" style="max-width: 100%; height: auto; border-radius: 4px;">
+                        <div class="book-cover">
+                            <img src="{{ book.cover.url }}" alt="{{ book.title }}">
+                        </div>
+                    {% else %}
+                        <div class="book-cover" style="display: flex; align-items: center; justify-content: center; color: #ccc;">
+                            📖
                         </div>
                     {% endif %}
-                    <h3 style="font-size: 16px; margin-bottom: 8px;">
+                    
+                    <h3 class="book-title">
                         <a href="{% url 'book-detail' book.pk %}">{{ book.title }}</a>
                     </h3>
+                    
                     {% if book.author %}
-                        <p style="color: #666; font-size: 14px; margin-bottom: 8px;">{{ book.author }}</p>
+                        <p class="book-author">
+                            <a href="{% url 'author-detail' book.author.pk %}" style="color: #999; text-decoration: none;">
+                                {{ book.author }}
+                            </a>
+                        </p>
                     {% endif %}
-                    {% if book.price %}
-                        <p style="font-weight: 600; color: #333;">{{ book.price }} ₽</p>
-                    {% endif %}
+                    
+                    <div class="book-price">{{ book.price }} ₽</div>
+                    
+                    <div class="book-availability {% if book.is_available %}available{% else %}unavailable{% endif %}">
+                        {% if book.is_available %}
+                            ✓ В наличии ({{ book.quantity }})
+                        {% else %}
+                            ✗ Нет в наличии
+                        {% endif %}
+                    </div>
+                    
+                    <a href="{% url 'book-detail' book.pk %}" class="btn">Подробнее</a>
                 </div>
             {% endfor %}
         </div>
@@ -40,7 +327,9 @@
             <div class="pagination-container">
                 <ul class="pagination">
                     {% if page_obj.has_previous %}
-                        <li><a href="?page={{ page_obj.previous_page_number }}">←</a></li>
+                        <li>
+                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if request.GET.genre %}genre={{ request.GET.genre }}&{% endif %}{% if request.GET.is_available %}is_available=1&{% endif %}page={{ page_obj.previous_page_number }}">←</a>
+                        </li>
                     {% else %}
                         <li class="disabled"><span>←</span></li>
                     {% endif %}
@@ -49,16 +338,20 @@
                         {% if page_obj.number == num %}
                             <li class="active"><span>{{ num }}</span></li>
                         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                            <li><a href="?page={{ num }}">{{ num }}</a></li>
+                            <li>
+                                <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if request.GET.genre %}genre={{ request.GET.genre }}&{% endif %}{% if request.GET.is_available %}is_available=1&{% endif %}page={{ num }}">{{ num }}</a>
+                            </li>
                         {% elif num == 1 or num == page_obj.paginator.num_pages %}
-                            <li><a href="?page={{ num }}">{{ num }}</a></li>
-                        {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
-                            <li class="disabled"><span>...</span></li>
+                            <li>
+                                <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if request.GET.genre %}genre={{ request.GET.genre }}&{% endif %}{% if request.GET.is_available %}is_available=1&{% endif %}page={{ num }}">{{ num }}</a>
+                            </li>
                         {% endif %}
                     {% endfor %}
 
                     {% if page_obj.has_next %}
-                        <li><a href="?page={{ page_obj.next_page_number }}">→</a></li>
+                        <li>
+                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if request.GET.genre %}genre={{ request.GET.genre }}&{% endif %}{% if request.GET.is_available %}is_available=1&{% endif %}page={{ page_obj.next_page_number }}">→</a>
+                        </li>
                     {% else %}
                         <li class="disabled"><span>→</span></li>
                     {% endif %}
@@ -66,28 +359,16 @@
             </div>
         {% endif %}
     {% else %}
-        <div class="news-article">
-            <p>Книг пока нет в каталоге.</p>
+        <div style="text-align: center; padding: 60px 20px; color: #999;">
+            <div style="font-size: 48px; margin-bottom: 20px;">📚</div>
+            <h3 style="color: #666;">
+                {% if request.GET.search or request.GET.genre or request.GET.is_available %}
+                    По вашему запросу ничего не найдено
+                {% else %}
+                    В каталоге пока нет книг
+                {% endif %}
+            </h3>
         </div>
     {% endif %}
 </div>
-
-{% block extra_css %}
-<style>
-    /* Адаптивная сетка для книг */
-    @media (max-width: 768px) {
-        .news-container > div[style*="grid"] {
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
-            gap: 15px !important;
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .news-container > div[style*="grid"] {
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 10px !important;
-        }
-    }
-</style>
-{% endblock %}
 {% endblock %}

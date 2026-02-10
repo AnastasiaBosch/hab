@@ -1,0 +1,66 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Регистрация — Книжный магазин «Бакен»{% endblock %}
+
+{% block content %}
+<div class="news-container">
+    <div class="page-header">
+        <h1>Создать аккаунт</h1>
+        <div class="subtitle">Зарегистрируйтесь чтобы совершать покупки</div>
+    </div>
+
+    <div class="profile-container">
+        {% if messages %}
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; padding: 15px; margin-bottom: 20px; color: #856404;">
+                {% for message in messages %}
+                    <p style="margin: 5px 0;">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" style="max-width: 500px;">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="id_username">Имя пользователя</label>
+                <input type="text" id="id_username" name="username" required autofocus>
+                <small style="color: #999; font-size: 12px; display: block; margin-top: 5px;">Обязательное поле. Не более 150 символов.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="id_email">Email</label>
+                <input type="email" id="id_email" name="email" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label for="id_first_name">Имя</label>
+                    <input type="text" id="id_first_name" name="first_name">
+                </div>
+
+                <div class="form-group">
+                    <label for="id_last_name">Фамилия</label>
+                    <input type="text" id="id_last_name" name="last_name">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_password1">Пароль</label>
+                <input type="password" id="id_password1" name="password1" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_password2">Подтвердите пароль</label>
+                <input type="password" id="id_password2" name="password2" required>
+            </div>
+
+            <button type="submit" class="btn" style="width: 100%; margin-top: 20px;">Создать аккаунт</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            <p style="color: #666; margin-bottom: 10px;">Уже есть аккаунт?</p>
+            <a href="{% url 'login' %}" class="btn" style="background: #f0f0f0; color: #333;">Войти</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

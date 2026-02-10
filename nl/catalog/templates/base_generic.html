@@ -28,6 +28,8 @@
         <!-- ШАПКА САЙТА -->
         <header class="site-header clearfix">
             <div class="logo-area">
+                <img src="{% static 'images/mayak.svg' %}" alt="Лозотун Бакен" class="mayak.svg">
+                <link rel="stylesheet" href="{% static 'css/main.css' %}">
                 <a href="{% url 'index' %}" class="logo-link" title="Главная"></a>
             </div>
 
@@ -39,27 +41,25 @@
                 </div>
 
                 <!-- Кнопка входа -->
-                <div style="margin-top: 50px;">
+                <div class="login-section">
                     {% if user.is_authenticated %}
                         <a href="{% url 'profile' %}" class="login-btn">
-                            <i class="fa fa-user"></i>
-                            {{ user.username }}
+                            <i class="fa fa-user"></i> {{ user.username }}
                         </a>
                     {% else %}
                         <a href="{% url 'login' %}" class="login-btn">
-                            <i class="fa fa-sign-in"></i>
                             Войти
                         </a>
                     {% endif %}
                 </div>
 
-                <!-- Навигация -->
+                <!-- Навигация (только SVG) -->
                 <nav class="main-nav">
-                    <a href="{% url 'news' %}" class="nav-item nav-new {% if request.resolver_match.url_name == 'news' or request.resolver_match.url_name == 'news-detail' %}active{% endif %}">Новинки</a>
-                    <a href="{% url 'books' %}" class="nav-item nav-catalog {% if request.resolver_match.url_name == 'books' or request.resolver_match.url_name == 'book-detail' %}active{% endif %}">Каталог</a>
-                    <a href="{% url 'faq' %}" class="nav-item nav-delivery {% if request.resolver_match.url_name == 'faq' %}active{% endif %}">Доставка</a>
-                    <a href="{% url 'cart' %}" class="nav-item nav-cart {% if request.resolver_match.url_name == 'cart' %}active{% endif %}">Корзина</a>
-                    <a href="{% url 'profile' %}" class="nav-item nav-contacts {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">Контакты</a>
+                    <a href="{% url 'news' %}" class="nav-item nav-new {% if request.resolver_match.url_name == 'news' or request.resolver_match.url_name == 'news-detail' %}active{% endif %}" title="Новинки"></a>
+                    <a href="{% url 'books' %}" class="nav-item nav-catalog {% if request.resolver_match.url_name == 'books' or request.resolver_match.url_name == 'book-detail' %}active{% endif %}" title="Каталог"></a>
+                    <a href="{% url 'faq' %}" class="nav-item nav-delivery {% if request.resolver_match.url_name == 'faq' %}active{% endif %}" title="Доставка"></a>
+                    <a href="{% url 'cart' %}" class="nav-item nav-cart {% if request.resolver_match.url_name == 'cart' %}active{% endif %}" title="Корзина"></a>
+                    <a href="{% url 'profile' %}" class="nav-item nav-contacts {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" title="Контакты"></a>
                 </nav>
             </div>
         </header>

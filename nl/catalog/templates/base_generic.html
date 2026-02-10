@@ -27,10 +27,13 @@
     <div class="container">
         <!-- ШАПКА САЙТА -->
         <header class="site-header clearfix">
+            <!-- ЛОГОТИП: Маяк + Волна + Надпись -->
             <div class="logo-area">
-                <img src="{% static 'images/mayak.svg' %}" alt="Лозотун Бакен" class="mayak.svg">
-                <link rel="stylesheet" href="{% static 'css/main.css' %}">
-                <a href="{% url 'index' %}" class="logo-link" title="Главная"></a>
+                <a href="{% url 'index' %}" class="logo-link" title="Главная">
+                    <img src="{% static 'images/mayak.svg' %}" alt="Маяк" class="logo-mayak">
+                    <img src="{% static 'images/volna.svg' %}" alt="Волна" class="logo-volna">
+                    <img src="{% static 'images/baken_shop.svg' %}" alt="Книжный магазин Бакен" class="logo-text">
+                </a>
             </div>
 
             <div class="header-content">

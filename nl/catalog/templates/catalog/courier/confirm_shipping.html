@@ -1,0 +1,79 @@
+{% extends "catalog/crm_base.html" %}
+
+{% block title %}Подтверждение получения заказа - CRM{% endblock %}
+
+{% block page_title %}Подтверждение получения заказа #{{ purchase.id }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-info text-white">
+        <h4 class="mb-0">Подтверждение получения заказа</h4>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <strong>Информация:</strong> Подтвердите получение заказа от сотрудника магазина.
+        </div>
+
+        <h5>Детали заказа #{{ purchase.id }}</h5>
+        <table class="table table-bordered">
+            <tr>
+                <th style="width: 40%">Клиент:</th>
+                <td>{{ purchase.user.get_full_name|default:purchase.user.username }}</td>
+            </tr>
+            <tr>
+                <th>Книга:</th>
+                <td>{{ purchase.book.title }}</td>
+            </tr>
+            <tr>
+                <th>Количество:</th>
+                <td>{{ purchase.quantity }} шт.</td>
+            </tr>
+            <tr>
+                <th>Способ доставки:</th>
+                <td>{{ purchase.get_delivery_display }}</td>
+            </tr>
+            <tr>
+                <th>Текущий статус:</th>
+                <td><span class="badge bg-warning">{{ purchase.get_status_display }}</span></td>
+            </tr>
+        </table>
+
+        <div class="mt-4">
+            {% if not purchase.courier_confirmed_shipping %}
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="condition" class="form-label">Состояние заказа:</label>
+                        <select class="form-select" id="condition" name="condition" required>
+                            <option value="good">✅ Хорошее - упакован, цел</option>
+                            <option value="damaged">⚠️ Есть повреждения</option>
+                            <option value="incomplete">❌ Неполный комплект</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="confirm_condition" required>
+                        <label class="form-check-label" for="confirm_condition">
+                            Я проверил состояние заказа и подтверждаю получение
+                        </label>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'courier_orders' %}" class="btn btn-secondary me-md-2">Отмена</a>
+                        <button type="submit" class="btn btn-info">
+                            Подтвердить получение заказа
+                        </button>
+                    </div>
+                </form>
+            {% else %}
+                <div class="alert alert-success">
+                    <strong>Вы уже подтвердили получение этого заказа!</strong><br>
+                    Ожидается подтверждение продавца. Как только продавец подтвердит готовность, статус автоматически изменится на "🔵 Доставляется".
+                </div>
+                <a href="{% url 'courier_orders' %}" class="btn btn-primary">Вернуться к списку заказов</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,34 +1,24 @@
+from django.core.exceptions import PermissionDenied
+from django.contrib.auth.mixins import AccessMixin
 from django.shortcuts import redirect
-from django.contrib import messages
+from django.contrib import messages  # ДОБАВЬТЕ ЭТОТ ИМПОРТ
 
-class SimpleRoleMixin:
-    """Простой миксин для проверки ролей"""
+class SimpleRoleMixin(AccessMixin):
+    """Миксин для проверки ролей пользователя"""
     allowed_roles = []
     
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect('login')
+            return self.handle_no_permission()
         
-        # Суперпользователь имеет доступ ко всему
-        if request.user.is_superuser:
-            return super().dispatch(request, *args, **kwargs)
+        # Проверяем, есть ли у пользователя роль
+        if not hasattr(request.user, 'role'):
+            messages.error(request, "У пользователя нет роли")
+            return redirect('index')
         
-        # Проверяем, что пользователь активен
-        if not request.user.is_active:
-            messages.error(request, 'Ваш аккаунт деактивирован')
-            return redirect('logout')
-        
-        # Проверяем роль пользователя
-        try:
-            user_role = request.user.role.role
-        except:
-            from .models import UserRole
-            UserRole.objects.create(user=request.user, role='customer')
-            user_role = 'customer'
-        
-        # Проверяем доступ по роли
-        if self.allowed_roles and user_role not in self.allowed_roles:
-            messages.error(request, 'У вас нет прав для доступа к этой странице')
-            return redirect('index')  # Перенаправляем на главную магазина
+        # Проверяем, разрешена ли роль
+        if request.user.role.role not in self.allowed_roles:
+            messages.error(request, "Доступ запрещен")
+            return redirect('index')
         
         return super().dispatch(request, *args, **kwargs)

@@ -1,0 +1,171 @@
+{% extends "catalog/crm_base.html" %}
+
+{% block title %}Подтверждение доставки - CRM{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">🏪 Подтверждение готовности к выдаче</h4>
+                </div>
+                <div class="card-body">
+                    {% if purchase.delivery_method == 'pickup' %}
+                    <div class="alert alert-info">
+                        <strong>Самовывоз:</strong> Клиент заберет заказ в магазине. Подтвердите, что заказ готов к выдаче.
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <strong>Доставка курьером:</strong> Заказ доставлен клиенту. Подтвердите завершение доставки.
+                    </div>
+                    {% endif %}
+
+                    <h5>Детали заказа #{{ purchase.id }}</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th style="width: 40%">Клиент:</th>
+                            <td>{{ purchase.user.get_full_name|default:purchase.user.username }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ purchase.user.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Книга:</th>
+                            <td>{{ purchase.book.title }}</td>
+                        </tr>
+                        <tr>
+                            <th>Количество:</th>
+                            <td>{{ purchase.quantity }} шт.</td>
+                        </tr>
+                        {% if purchase.delivery_method == 'pickup' %}
+                        <tr>
+                            <th>Место выдачи:</th>
+                            <td>Магазин "Книжная лавка" (ул. Примерная, 123)</td>
+                        </tr>
+                        <tr>
+                            <th>Часы работы:</th>
+                            <td>Пн-Пт: 10:00-20:00, Сб-Вс: 11:00-18:00</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <th>Текущий статус:</th>
+                            <td><span class="badge bg-info">{{ purchase.get_status_display_with_color }}</span></td>
+                        </tr>
+                    </table>
+
+                    <h5 class="mt-4">Статус подтверждений:</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card {% if purchase.staff_confirmed_delivery %}border-success{% else %}border-warning{% endif %}">
+                                <div class="card-body">
+                                    <h6 class="card-title">Продавец</h6>
+                                    {% if purchase.staff_confirmed_delivery %}
+                                        <p class="text-success"><strong>✅ Подтверждено</strong></p>
+                                        <small class="text-muted">
+                                            Подтвердил: {{ purchase.confirmed_by_staff.username }}<br>
+                                            Дата: {{ purchase.confirmation_date|date:"d.m.Y H:i" }}
+                                        </small>
+                                    {% else %}
+                                        <p class="text-warning"><strong>⏳ Ожидает</strong></p>
+                                        {% if purchase.delivery_method == 'pickup' %}
+                                            <p>Требуется подтверждение готовности к выдаче</p>
+                                        {% else %}
+                                            <p>Требуется подтверждение завершения доставки</p>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card {% if purchase.courier_confirmed_delivery %}border-success{% else %}border-warning{% endif %}">
+                                <div class="card-body">
+                                    <h6 class="card-title">Курьер</h6>
+                                    {% if purchase.courier_confirmed_delivery %}
+                                        <p class="text-success"><strong>✅ Подтверждено</strong></p>
+                                        <small class="text-muted">
+                                            Подтвердил: {{ purchase.confirmed_by_courier.username }}<br>
+                                            Дата: {{ purchase.confirmation_date|date:"d.m.Y H:i" }}
+                                        </small>
+                                    {% else %}
+                                        <p class="text-warning"><strong>⏳ Ожидает</strong></p>
+                                        {% if purchase.delivery_method == 'pickup' %}
+                                            <p>Не требуется (самовывоз)</p>
+                                        {% else %}
+                                            <p>Ожидает подтверждения доставки клиенту</p>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        {% if not purchase.staff_confirmed_delivery %}
+                            <form method="post" action="{% url 'confirm_delivery_staff' purchase.id %}">
+                                {% csrf_token %}
+                                
+                                {% if purchase.delivery_method == 'pickup' %}
+                                    <div class="mb-3">
+                                        <label for="pickup_code" class="form-label">Код выдачи (необязательно):</label>
+                                        <input type="text" class="form-control" id="pickup_code" name="pickup_code" placeholder="Например: AB123">
+                                        <div class="form-text">Код для получения заказа клиентом</div>
+                                    </div>
+                                    
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="ready_for_pickup" required>
+                                        <label class="form-check-label" for="ready_for_pickup">
+                                            Заказ подготовлен, упакован и готов к выдаче клиенту
+                                        </label>
+                                    </div>
+                                {% else %}
+                                    <div class="mb-3">
+                                        <label for="delivery_notes" class="form-label">Комментарий к доставке:</label>
+                                        <textarea class="form-control" id="delivery_notes" name="delivery_notes" rows="3" placeholder="Особенности доставки, контакт с клиентом..."></textarea>
+                                    </div>
+                                    
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="client_received" required>
+                                        <label class="form-check-label" for="client_received">
+                                            Клиент подтвердил получение заказа в хорошем состоянии
+                                        </label>
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="alert alert-warning">
+                                    <strong>Внимание!</strong> Статус заказа изменится на "🟢 Доставлен" только после подтверждения всех сторон.
+                                </div>
+                                
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <a href="{% url 'staff_orders' %}" class="btn btn-secondary me-md-2">Отмена</a>
+                                    <button type="submit" class="btn btn-success">
+                                        {% if purchase.delivery_method == 'pickup' %}
+                                            🏪 Подтвердить готовность к выдаче
+                                        {% else %}
+                                            ✅ Подтвердить завершение доставки
+                                        {% endif %}
+                                    </button>
+                                </div>
+                            </form>
+                        {% else %}
+                            <div class="alert alert-success">
+                                <strong>Вы уже подтвердили этот заказ!</strong><br>
+                                {% if purchase.delivery_method != 'pickup' %}
+                                    Ожидается подтверждение курьера. Как только курьер подтвердит доставку, статус автоматически изменится на "🟢 Доставлен".
+                                {% else %}
+                                    Заказ готов к выдаче клиенту.
+                                {% endif %}
+                            </div>
+                            <a href="{% url 'staff_orders' %}" class="btn btn-primary">Вернуться к списку заказов</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>Дата создания заказа: {{ purchase.purchase_date|date:"d.m.Y H:i" }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

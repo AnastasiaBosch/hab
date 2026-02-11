@@ -1,144 +1,134 @@
-{% extends "catalog/crm_base.html" %}
+<!-- В файле dashboard.html -->
+{% extends "catalog/crm_base.html" %}  <!-- Измените с base_generic.html -->
 
 {% block title %}CRM Панель сотрудника{% endblock %}
-{% block page_title %}CRM Панель сотрудника{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card text-white bg-primary">
-            <div class="card-body">
-                <h5 class="card-title">Заказы сегодня</h5>
-                <h2 class="card-text">{{ today_orders_count }}</h2>
-                <p class="card-text">На сумму: {{ today_revenue }} ₽</p>
-            </div>
-        </div>
-    </div>
+<div class="container mt-4">
+    <h1 class="mb-4">📊 CRM Панель сотрудника</h1>
     
-    <div class="col-md-3">
-        <div class="card text-white bg-success">
-            <div class="card-body">
-                <h5 class="card-title">Всего книг</h5>
-                <h2 class="card-text">{{ total_books }}</h2>
+    <!-- Статистика -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Заказы сегодня</h5>
+                    <h2 class="card-text">{{ today_orders_count }}</h2>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <div class="col-md-3">
-        <div class="card text-white bg-warning">
-            <div class="card-body">
-                <h5 class="card-title">Активные заказы</h5>
-                <h2 class="card-text">{{ active_orders }}</h2>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-success">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Выручка сегодня</h5>
+                    <h2 class="card-text">{{ today_revenue }} ₽</h2>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <div class="col-md-3">
-        <div class="card text-white bg-danger">
-            <div class="card-body">
-                <h5 class="card-title">Низкие остатки</h5>
-                <h2 class="card-text">{{ low_stock|length }}</h2>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-info">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Всего книг</h5>
+                    <h2 class="card-text">{{ total_books }}</h2>
+                </div>
             </div>
         </div>
-    </div>
-</div>
-
-{% if low_stock %}
-<div class="card mb-4">
-    <div class="card-header bg-warning">
-        <h5 class="mb-0">⚠️ Книги с низким остатком (< 3 шт.)</h5>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Книга</th>
-                        <th>Автор</th>
-                        <th>Остаток</th>
-                        <th>Цена</th>
-                        <th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for book in low_stock %}
-                    <tr>
-                        <td>
-                            <a href="{% url 'book-detail' book.pk %}">{{ book.title }}</a>
-                        </td>
-                        <td>{{ book.author }}</td>
-                        <td class="text-danger fw-bold">{{ book.quantity }}</td>
-                        <td>{{ book.price }} ₽</td>
-                        <td>
-                            <a href="{% url 'edit_book' book.pk %}" class="btn btn-sm btn-outline-primary">
-                                Редактировать
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-<div class="row">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Быстрые действия</h5>
-            </div>
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    <a href="{% url 'staff_orders' %}" class="btn btn-primary">
-                        📦 Управление заказами
-                    </a>
-                    <a href="{% url 'staff_books' %}" class="btn btn-secondary">
-                        📚 Управление книгами
-                    </a>
-                    <a href="{% url 'add_book' %}" class="btn btn-success">
-                        ➕ Добавить книгу
-                    </a>
-                    <a href="{% url 'staff_news' %}" class="btn btn-info">
-                        📰 Управление новостями
-                    </a>
-                    <a href="{% url 'admin:index' %}" class="btn btn-dark">
-                        ⚙️ Админ-панель
-                    </a>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Активные заказы</h5>
+                    <h2 class="card-text">{{ active_orders }}</h2>
                 </div>
             </div>
         </div>
     </div>
     
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-success text-white">
-                <h5 class="mb-0">Статистика</h5>
+    <!-- Блок с низким запасом -->
+    {% if low_stock %}
+    <div class="card mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">⚠️ Низкий запас книг</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Книга</th>
+                            <th>Автор</th>
+                            <th>Остаток</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for book in low_stock %}
+                        <tr>
+                            <td>{{ book.title }}</td>
+                            <td>{{ book.author }}</td>
+                            <td>
+                                <span class="badge bg-danger">{{ book.quantity }} шт.</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'edit_book' book.pk %}" class="btn btn-sm btn-primary">
+                                    Пополнить
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            <div class="card-body">
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Заказов сегодня
-                        <span class="badge bg-primary rounded-pill">{{ today_orders_count }}</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Выручка сегодня
-                        <span class="badge bg-success rounded-pill">{{ today_revenue }} ₽</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Активных заказов
-                        <span class="badge bg-warning rounded-pill">{{ active_orders }}</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Книг на складе
-                        <span class="badge bg-info rounded-pill">{{ total_books }}</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Книг с низким остатком
-                        <span class="badge bg-danger rounded-pill">{{ low_stock|length }}</span>
-                    </li>
-                </ul>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Информация о пользователе -->
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">👤 Информация о пользователе</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Имя пользователя:</strong> {{ user.username }}</p>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Роль:</strong> 
+                        {% if user.role %}
+                            <span class="badge 
+                                {% if user.role.role == 'staff' %}bg-success
+                                {% elif user.role.role == 'courier' %}bg-info
+                                {% else %}bg-secondary{% endif %}">
+                                {{ user.role.get_role_display }}
+                            </span>
+                        {% else %}
+                            <span class="badge bg-warning">Нет роли</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Дата входа:</strong> {{ user.last_login|date:"d.m.Y H:i" }}</p>
+                </div>
+            </div>
+            
+            <!-- Быстрые действия -->
+            <div class="mt-4">
+                <h6>Быстрые действия:</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'staff_orders' %}" class="btn btn-primary">
+                        📦 Управление заказами
+                    </a>
+                    <a href="{% url 'staff_books' %}" class="btn btn-success">
+                        📚 Управление книгами
+                    </a>
+                    <a href="{% url 'staff_news' %}" class="btn btn-info">
+                        📰 Управление новостями
+                    </a>
+                    {% if user.role.role == 'courier' or user.role.role == 'staff' %}
+                    <a href="{% url 'courier_orders' %}" class="btn btn-warning">
+                        🚚 Заказы для доставки
+                    </a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>

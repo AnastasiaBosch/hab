@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'catalog.apps.CatalogConfig',
     'django_filters',
+	'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -131,3 +132,5 @@ STATICFILES_DIRS = [
 LOGIN_REDIRECT_URL = '/catalog/accounts/profile/'
 LOGOUT_REDIRECT_URL = '/catalog/accounts/login/'
 LOGIN_URL = '/catalog/accounts/login/'
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'

@@ -13,45 +13,22 @@
                     <form method="post">
                         {% csrf_token %}
                         
-                        {% if messages %}
-                        <div class="alert alert-danger">
-                            {% for message in messages %}
-                                <p>{{ message }}</p>
-                            {% endfor %}
-                        </div>
+                        <!-- Вывод ошибок формы -->
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <p>{{ field.label }}: {{ error }}</p>
+                                    {% endfor %}
+                                {% endfor %}
+                                {% for error in form.non_field_errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
                         {% endif %}
                         
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Имя пользователя</label>
-                            <input type="text" class="form-control" id="username" name="username" required>
-                            <div class="form-text">Обязательное поле. Не более 150 символов.</div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="first_name" class="form-label">Имя</label>
-                                <input type="text" class="form-control" id="first_name" name="first_name" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="last_name" class="form-label">Фамилия</label>
-                                <input type="text" class="form-control" id="last_name" name="last_name" required>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="password1" class="form-label">Пароль</label>
-                            <input type="password" class="form-control" id="password1" name="password1" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="password2" class="form-label">Подтверждение пароля</label>
-                            <input type="password" class="form-control" id="password2" name="password2" required>
-                        </div>
+                        <!-- Используем поля из формы -->
+                        {{ form.as_p }}
                         
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">Зарегистрироваться</button>

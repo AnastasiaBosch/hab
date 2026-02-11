@@ -1,0 +1,98 @@
+{% extends "catalog/crm_base.html" %}
+
+{% block title %}Добавление книги - CRM{% endblock %}
+
+{% block page_title %}Добавление книги{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="id_title" class="form-label">Название:</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="text-danger">{{ form.title.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="id_author" class="form-label">Автор:</label>
+                {{ form.author }}
+                {% if form.author.errors %}
+                    <div class="text-danger">{{ form.author.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="id_summary" class="form-label">Описание:</label>
+                {{ form.summary }}
+                {% if form.summary.errors %}
+                    <div class="text-danger">{{ form.summary.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="id_genre" class="form-label">Жанры:</label>
+                {{ form.genre }}
+                {% if form.genre.errors %}
+                    <div class="text-danger">{{ form.genre.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="id_price" class="form-label">Цена:</label>
+                    {{ form.price }}
+                    {% if form.price.errors %}
+                        <div class="text-danger">{{ form.price.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="id_quantity" class="form-label">Количество:</label>
+                    {{ form.quantity }}
+                    {% if form.quantity.errors %}
+                        <div class="text-danger">{{ form.quantity.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="id_avatar" class="form-label">Изображение (необязательно):</label>
+                {{ form.avatar }}
+                {% if form.avatar.errors %}
+                    <div class="text-danger">{{ form.avatar.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-success">Добавить книгу</button>
+                <a href="{% url 'staff_books' %}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    #id_title,
+    #id_summary,
+    #id_price,
+    #id_quantity {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+    }
+    
+    #id_author,
+    #id_genre {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}

@@ -2,7 +2,7 @@
 
 {% block title %}Изменение статуса заказа{% endblock %}
 
-{% block page_title %}🔄 Изменение статуса заказа #{{ purchase.id }}{% endblock %}
+{% block page_title %}Изменение статуса заказа #{{ purchase.id }}{% endblock %}
 
 {% block content %}
 <div class="card">
@@ -44,7 +44,7 @@
             </tr>
         </table>
         
-        <form method="post" action="{% url 'confirm_change_status' object.id %}">
+        <form method="post" action="{% url 'confirm_change_status' purchase.id %}">
             {% csrf_token %}
             
             <div class="mb-3">

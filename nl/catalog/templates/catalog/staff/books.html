@@ -6,8 +6,42 @@
 <div class="container">
     <h1 class="mb-4">📚 Управление книгами</h1>
     
-    <div class="mb-4">
-        <a href="{% url 'add_book' %}" class="btn btn-success">➕ Добавить книгу</a>
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'staff_books' %}" class="btn btn-sm {% if not available_filter %}btn-primary{% else %}btn-outline-primary{% endif %}">Все</a>
+                        <a href="{% url 'staff_books' %}?available=yes" class="btn btn-sm {% if available_filter == 'yes' %}btn-primary{% else %}btn-outline-primary{% endif %}">В наличии</a>
+                        <a href="{% url 'staff_books' %}?available=no" class="btn btn-sm {% if available_filter == 'no' %}btn-primary{% else %}btn-outline-primary{% endif %}">Нет в наличии</a>
+                    </div>
+                    
+                    <div class="btn-group ms-2" role="group">
+                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            {% if genre_filter %}
+                                {{ genres|get_item:genre_filter }}
+                            {% else %}
+                                Все жанры
+                            {% endif %}
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'staff_books' %}{% if available_filter %}?available={{ available_filter }}{% endif %}">Все жанры</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% for genre in genres %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'staff_books' %}?genre={{ genre.id }}{% if available_filter %}&available={{ available_filter }}{% endif %}">
+                                    {{ genre.name }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="{% url 'add_book' %}" class="btn btn-success">➕ Добавить книгу</a>
+                </div>
+            </div>
+        </div>
     </div>
     
     <div class="card">
@@ -20,6 +54,7 @@
                             <th>Автор</th>
                             <th>Цена</th>
                             <th>Остаток</th>
+                            <th>Продано</th>
                             <th>Действия</th>
                         </tr>
                     </thead>
@@ -34,20 +69,46 @@
                                     {{ book.quantity }} шт.
                                 </span>
                             </td>
+                            <td>{{ book.sold_count }} шт.</td>
                             <td>
-                                <a href="{% url 'edit_book' book.pk %}" class="btn btn-sm btn-primary">
+                                <a href="{% url 'edit_book' book.pk %}" class="btn btn-sm btn-primary me-1">
                                     Редактировать
+                                </a>
+                                <a href="{{ book.get_absolute_url }}" class="btn btn-sm btn-info" target="_blank">
+                                    Просмотр
                                 </a>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" class="text-center">Нет книг</td>
+                            <td colspan="6" class="text-center py-4">Нет книг</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+            
+            {% if is_paginated %}
+            <nav aria-label="Навигация по страницам" class="mt-3">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if genre_filter %}&genre={{ genre_filter }}{% endif %}{% if available_filter %}&available={{ available_filter }}{% endif %}">Назад</a>
+                    </li>
+                    {% endif %}
+                    
+                    <li class="page-item disabled">
+                        <span class="page-link">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+                    </li>
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if genre_filter %}&genre={{ genre_filter }}{% endif %}{% if available_filter %}&available={{ available_filter }}{% endif %}">Вперед</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
         </div>
     </div>
 </div>

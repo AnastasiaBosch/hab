@@ -1,0 +1,124 @@
+{% extends "catalog/crm_base.html" %}
+
+{% block title %}Подтверждение готовности к отправке - CRM{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">📦 Подтверждение готовности к отправке</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>Информация:</strong> Подтвердите, что заказ собран и готов к передаче курьеру.
+                    </div>
+
+                    <h5>Детали заказа #{{ purchase.id }}</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th style="width: 40%">Клиент:</th>
+                            <td>{{ purchase.user.get_full_name|default:purchase.user.username }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ purchase.user.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Книга:</th>
+                            <td>{{ purchase.book.title }}</td>
+                        </tr>
+                        <tr>
+                            <th>Количество:</th>
+                            <td>{{ purchase.quantity }} шт.</td>
+                        </tr>
+                        <tr>
+                            <th>Способ доставки:</th>
+                            <td>{{ purchase.get_delivery_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Текущий статус:</th>
+                            <td><span class="badge bg-warning">{{ purchase.get_status_display_with_color }}</span></td>
+                        </tr>
+                    </table>
+
+                    <h5 class="mt-4">Статус подтверждений:</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card {% if purchase.staff_confirmed_shipping %}border-success{% else %}border-warning{% endif %}">
+                                <div class="card-body">
+                                    <h6 class="card-title">Продавец</h6>
+                                    {% if purchase.staff_confirmed_shipping %}
+                                        <p class="text-success"><strong>✅ Подтверждено</strong></p>
+                                        <small class="text-muted">
+                                            Подтвердил: {{ purchase.confirmed_by_staff.username }}<br>
+                                            Дата: {{ purchase.confirmation_date|date:"d.m.Y H:i" }}
+                                        </small>
+                                    {% else %}
+                                        <p class="text-warning"><strong>⏳ Ожидает</strong></p>
+                                        <p>Требуется ваше подтверждение</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card {% if purchase.courier_confirmed_shipping %}border-success{% else %}border-warning{% endif %}">
+                                <div class="card-body">
+                                    <h6 class="card-title">Курьер</h6>
+                                    {% if purchase.courier_confirmed_shipping %}
+                                        <p class="text-success"><strong>✅ Подтверждено</strong></p>
+                                        <small class="text-muted">
+                                            Подтвердил: {{ purchase.confirmed_by_courier.username }}<br>
+                                            Дата: {{ purchase.confirmation_date|date:"d.m.Y H:i" }}
+                                        </small>
+                                    {% else %}
+                                        <p class="text-warning"><strong>⏳ Ожидает</strong></p>
+                                        <p>Ожидает подтверждения курьера</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        {% if not purchase.staff_confirmed_shipping %}
+                            <form method="post" action="{% url 'confirm_shipping_staff' purchase.id %}">
+                                {% csrf_token %}
+                                
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="confirm_ready" required>
+                                    <label class="form-check-label" for="confirm_ready">
+                                        Я подтверждаю, что заказ #{{ purchase.id }} собран, проверен и готов к передаче курьеру
+                                    </label>
+                                </div>
+                                
+                                <div class="alert alert-warning">
+                                    <strong>Внимание!</strong> После вашего подтверждения статус изменится на "🟠 Собран". 
+                                    Курьер должен будет подтвердить получение заказа для смены статуса на "🔵 Доставляется".
+                                </div>
+                                
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <a href="{% url 'staff_orders' %}" class="btn btn-secondary me-md-2">Отмена</a>
+                                    <button type="submit" class="btn btn-info">
+                                        📦 Подтвердить готовность к отправке
+                                    </button>
+                                </div>
+                            </form>
+                        {% else %}
+                            <div class="alert alert-success">
+                                <strong>Вы уже подтвердили этот заказ!</strong><br>
+                                Ожидается подтверждение курьера. Как только курьер подтвердит получение, статус автоматически изменится на "🔵 Доставляется".
+                            </div>
+                            <a href="{% url 'staff_orders' %}" class="btn btn-primary">Вернуться к списку заказов</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>Дата создания заказа: {{ purchase.purchase_date|date:"d.m.Y H:i" }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

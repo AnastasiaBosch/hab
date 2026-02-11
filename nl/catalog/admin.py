@@ -32,8 +32,10 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Purchase)
 class PurchaseAdmin(admin.ModelAdmin):
-    list_display = ('user', 'book', 'quantity', 'price', 'total_price', 'delivery_method', 'status', 'purchase_date')
-    list_filter = ('purchase_date', 'user', 'payment_method', 'delivery_method', 'status')
+    list_display = ('user', 'book', 'quantity', 'price', 'total_price', 'delivery_method', 'status', 'purchase_date', 'staff_confirmed_shipping', 'courier_confirmed_shipping',
+                    'staff_confirmed_delivery', 'courier_confirmed_delivery',)
+    list_filter = ('purchase_date', 'user', 'payment_method', 'delivery_method', 'status', 'staff_confirmed_shipping', 'courier_confirmed_shipping',
+                    'staff_confirmed_delivery', 'courier_confirmed_delivery',)
     search_fields = ('user__username', 'book__title')
     date_hierarchy = 'purchase_date'
     list_editable = ('status',)

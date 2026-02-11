@@ -8,7 +8,7 @@
 {% for item in cart_items %}
 <li>
     {{ item.book.title }} - {{ item.quantity }} × {{ item.book.price }} ₽ = {{ item.total }} ₽
-    <a href="{% url 'remove_from_cart' item.book.pk %}">[X]</a>
+    <a href="{% url 'remove_from_cart' item.book.pk %}">Удалить</a>
 </li>
 {% endfor %}
 </ul>

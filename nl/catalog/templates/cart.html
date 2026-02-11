@@ -1,228 +1,110 @@
 {% extends "base_generic.html" %}
+{% load static %}
 
 {% block title %}Корзина — Книжный магазин «Бакен»{% endblock %}
 
-{% block meta %}
-<meta name="description" content="Корзина покупок книжного магазина Бакен.">
-{% endblock %}
-
-{% block extra_css %}
-<style>
-.cart-item {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  padding: 20px;
-  margin-bottom: 15px;
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-
-.cart-item-image {
-  flex: 0 0 100px;
-}
-
-.cart-item-image img {
-  width: 100%;
-  height: auto;
-  border-radius: 4px;
-}
-
-.cart-item-info {
-  flex: 1;
-}
-
-.cart-item-title {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.cart-item-author {
-  color: #666;
-  font-size: 14px;
-  margin-bottom: 8px;
-}
-
-.cart-item-price {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-}
-
-.cart-item-actions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.cart-quantity {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.cart-quantity input {
-  width: 60px;
-  padding: 5px 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  text-align: center;
-}
-
-.btn-remove {
-  background: #f44336;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-  transition: background 0.2s;
-}
-
-.btn-remove:hover {
-  background: #d32f2f;
-  color: white;
-}
-
-.cart-summary {
-  background: #f9f9f9;
-  border-radius: 8px;
-  padding: 25px;
-  margin-top: 30px;
-}
-
-.cart-summary h2 {
-  font-size: 20px;
-  margin-bottom: 20px;
-}
-
-.cart-total {
-  display: flex;
-  justify-content: space-between;
-  font-size: 24px;
-  font-weight: 600;
-  margin: 20px 0;
-  padding-top: 15px;
-  border-top: 2px solid #ddd;
-}
-
-.btn-checkout {
-  background: #4CAF50;
-  color: white;
-  border: none;
-  padding: 15px 30px;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  width: 100%;
-  text-decoration: none;
-  display: block;
-  text-align: center;
-  transition: background 0.2s;
-}
-
-.btn-checkout:hover {
-  background: #45a049;
-  color: white;
-}
-
-.empty-cart {
-  text-align: center;
-  padding: 60px 20px;
-}
-
-.empty-cart i {
-  font-size: 80px;
-  color: #ddd;
-  margin-bottom: 20px;
-}
-
-@media (max-width: 768px) {
-  .cart-item {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .cart-item-image {
-    flex: 0 0 auto;
-  }
-  
-  .cart-item-actions {
-    flex-direction: column;
-    width: 100%;
-  }
-  
-  .cart-quantity {
-    width: 100%;
-    justify-content: center;
-  }
-}
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="news-container">
-  <div class="page-header">
+<div class="page-header">
     <h1>Корзина</h1>
-    <div class="subtitle">Ваши выбранные товары</div>
-  </div>
-
-  {% if cart_items %}
-    <!-- ТОВАРЫ В КОРЗИНЕ -->
-    {% for item in cart_items %}
-      <div class="cart-item">
-        {% if item.book.cover %}
-          <div class="cart-item-image">
-            <img src="{{ item.book.cover.url }}" alt="{{ item.book.title }}">
-          </div>
-        {% endif %}
-        
-        <div class="cart-item-info">
-          <div class="cart-item-title">{{ item.book.title }}</div>
-          {% if item.book.author %}
-            <div class="cart-item-author">{{ item.book.author }}</div>
-          {% endif %}
-          <div class="cart-item-price">{{ item.book.price }} ₽</div>
-        </div>
-        
-        <div class="cart-item-actions">
-          <div class="cart-quantity">
-            <span>Количество:</span>
-            <input type="number" value="{{ item.quantity }}" min="1" data-book-id="{{ item.book.id }}">
-          </div>
-          <a href="{% url 'remove_from_cart' item.book.id %}" class="btn-remove" onclick="return confirm('Удалить товар из корзины?')">
-            <i class="fa fa-trash"></i> Удалить
-          </a>
-        </div>
-      </div>
-    {% endfor %}
-
-    <!-- ИТОГО -->
-    <div class="cart-summary">
-      <h2>Итого</h2>
-      <div class="cart-total">
-        <span>Всего:</span>
-        <span>{{ total_price }} ₽</span>
-      </div>
-      <a href="{% url 'checkout' %}" class="btn-checkout">Оформить заказ</a>
-      <div style="text-align: center; margin-top: 15px;">
-        <a href="{% url 'books' %}" style="color: #666; font-size: 14px;">← Продолжить покупки</a>
-      </div>
-    </div>
-  {% else %}
-    <!-- ПУСТАЯ КОРЗИНА -->
-    <div class="news-article">
-      <div class="empty-cart">
-        <i class="fa fa-shopping-cart"></i>
-        <h3>Корзина пуста</h3>
-        <p style="color: #666; margin: 20px 0;">Добавьте книги из каталога, чтобы начать покупки</p>
-        <a href="{% url 'books' %}" class="btn-checkout" style="max-width: 300px; margin: 0 auto;">Перейти в каталог</a>
-      </div>
-    </div>
-  {% endif %}
 </div>
+
+{% if cart_items %}
+<div class="cart-container">
+    <!-- ЛЕВАЯ ЧАСТЬ: Список товаров -->
+    <div class="cart-items-section">
+        {% for item in cart_items %}
+        <div class="cart-item">
+            <!-- Обложка книги -->
+            <div class="cart-item-image">
+                {% if item.book.avatar %}
+                    <img src="{{ item.book.avatar.url }}" alt="{{ item.book.title }}">
+                {% else %}
+                    <div class="cart-item-no-image">Нет обложки</div>
+                {% endif %}
+            </div>
+
+            <!-- Информация о книге -->
+            <div class="cart-item-info">
+                <h3 class="cart-item-title">
+                    <a href="{% url 'book-detail' item.book.pk %}">{{ item.book.title }}</a>
+                </h3>
+                {% if item.book.author %}
+                <p class="cart-item-author">{{ item.book.author }}</p>
+                {% endif %}
+
+                <!-- Количество -->
+                <div class="cart-item-quantity">
+                    <span>Количество:</span>
+                    <div class="quantity-controls">
+                        <form method="post" action="{% url 'update_cart' item.book.pk %}" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="quantity" value="{{ item.quantity|add:'-1' }}">
+                            <button type="submit" class="quantity-btn" {% if item.quantity <= 1 %}disabled{% endif %}>−</button>
+                        </form>
+                        
+                        <span class="quantity-value">{{ item.quantity }}</span>
+                        
+                        <form method="post" action="{% url 'update_cart' item.book.pk %}" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="quantity" value="{{ item.quantity|add:'1' }}">
+                            <button type="submit" class="quantity-btn">+</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Цена за единицу -->
+                <p class="cart-item-price">{{ item.book.price }} ₽</p>
+
+                <!-- Кнопка удалить -->
+                <form method="post" action="{% url 'remove_from_cart' item.book.pk %}" class="cart-item-remove-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-remove">Удалить</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- ПРАВАЯ ЧАСТЬ: Итоговый блок -->
+    <div class="cart-summary-section">
+        <div class="cart-summary">
+            <h2>Итого</h2>
+            
+            <div class="summary-row">
+                <span>{{ cart_items|length }} товар{% if cart_items|length > 1 %}ов{% endif %}</span>
+                <span>{{ total_price }} ₽</span>
+            </div>
+
+            {% if discount > 0 %}
+            <div class="summary-row discount">
+                <span>Скидка</span>
+                <span>−{{ discount }} ₽</span>
+            </div>
+            {% endif %}
+
+            <div class="summary-row total">
+                <span>Итого</span>
+                <span>{{ final_price|default:total_price }} ₽</span>
+            </div>
+
+            <a href="{% url 'checkout' %}" class="btn btn-primary btn-large btn-checkout">
+                Перейти к оформлению
+            </a>
+            
+            <a href="{% url 'books' %}" class="btn btn-secondary">
+                Продолжить покупки
+            </a>
+        </div>
+    </div>
+</div>
+{% else %}
+<!-- Пустая корзина -->
+<div class="empty-cart">
+    <div class="empty-cart-icon">🛒</div>
+    <h2>Корзина пуста</h2>
+    <p>Добавьте книги из каталога</p>
+    <a href="{% url 'books' %}" class="btn btn-primary">Добавить товары</a>
+</div>
+{% endif %}
+
 {% endblock %}

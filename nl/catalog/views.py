@@ -409,6 +409,19 @@ def checkout(request):
             f'Вы можете забрать заказ в магазине.'
         )
         
+        messages.success(
+            request,
+            f"""Заказ оформлен!
+            Статус: Создан
+            Количество товаров: {quantity}
+            Товары: {total_price:.2f} руб.
+            Скидка: {discount_percent}% ({discount_amount:.2f} руб.)
+            Доставка: {delivery_cost:.2f} руб.
+            Итого: {final_total:.2f} руб.
+            Способ оплаты: {payment_method}
+            Способ доставки: {delivery_method}
+            Вы можете забрать заказ в магазине."""
+        )
         return redirect('profile')
     
     # Если GET запрос, показываем страницу оформления заказа

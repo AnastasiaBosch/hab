@@ -6,7 +6,7 @@
 <p><strong>Email:</strong> {{ user.email }}</p>
 <p><strong>Дата регистрации:</strong> {{ user.date_joined|date:"d.m.Y" }}</p>
 
-<h3>📊 Статистика:</h3>
+<h3>Статистика:</h3>
 <p>Всего покупок: {{ user.purchases.count }}</p>
 <p>Общая сумма покупок: {{ user.profile.total_purchases }} ₽</p>
 <p>Ваша скидка: {{ user.profile.discount_percent }}%</p>

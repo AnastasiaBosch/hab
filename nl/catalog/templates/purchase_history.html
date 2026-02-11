@@ -1,0 +1,70 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block title %}История покупок — Книжный магазин «Бакен»{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>История покупок</h1>
+</div>
+
+<!-- Скидка пользователя -->
+<div class="discount-info">
+    <p><strong>Ваша скидка:</strong> {{ user_discount|default:"0" }}%</p>
+</div>
+
+<!-- Таблица истории -->
+{% if purchases %}
+<div class="purchases-table-container">
+    <table class="purchases-table">
+        <thead>
+            <tr>
+                <th>№ Заказа</th>
+                <th>Дата</th>
+                <th>Товары</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for purchase in purchases %}
+            <tr>
+                <td>#{{ purchase.id }}</td>
+                <td>{{ purchase.created_at|date:"d.m.Y H:i" }}</td>
+                <td>
+                    {% for item in purchase.items.all %}
+                        {{ item.book.title }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        —
+                    {% endfor %}
+                </td>
+                <td>{{ purchase.total_price }} ₽</td>
+                <td>
+                    <span class="status-badge status-{{ purchase.status }}">
+                        {{ purchase.get_status_display }}
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Итоговая сумма покупок -->
+<div class="total-purchases">
+    <p><strong>Сумма покупок:</strong> {{ total_spent|default:"0" }} ₽</p>
+</div>
+
+{% else %}
+<div class="empty-state">
+    <p>У вас пока нет покупок</p>
+    <a href="{% url 'books' %}" class="btn btn-primary">Перейти в каталог</a>
+</div>
+{% endif %}
+
+<!-- Кнопка назад -->
+<div class="back-button">
+    <a href="{% url 'profile' %}" class="btn btn-secondary">Назад в профиль</a>
+</div>
+
+{% endblock %}

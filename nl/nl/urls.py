@@ -23,6 +23,7 @@ from catalog import views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
     path('', views.index, name='index'),
     path('news/', views.NewsListView.as_view(), name='news'),
     path('news/<int:pk>/', views.NewsDetailView.as_view(), name='news-detail'),

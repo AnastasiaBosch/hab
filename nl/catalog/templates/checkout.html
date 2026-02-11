@@ -1,0 +1,124 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block title %}Оформление заказа — Книжный магазин «Бакен»{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Оформление заказа</h1>
+</div>
+
+{% if cart_items %}
+<form method="post" class="checkout-form">
+    {% csrf_token %}
+    
+    <div class="checkout-container">
+        <!-- БЛОК 1: Ваш заказ -->
+        <div class="checkout-block">
+            <h2>Ваш заказ</h2>
+            <div class="order-items">
+                {% for item in cart_items %}
+                <div class="order-item">
+                    <span class="order-item-name">{{ item.book.title }}</span>
+                    <span class="order-item-quantity">× {{ item.quantity }}</span>
+                    <span class="order-item-price">{{ item.book.price }} ₽</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- БЛОК 2: Способ оплаты -->
+        <div class="checkout-block">
+            <h2>Способ оплаты</h2>
+            <div class="payment-methods">
+                <label class="payment-option">
+                    <input type="radio" name="payment_method" value="cash" checked>
+                    <span>Наличные при получении</span>
+                </label>
+                <label class="payment-option">
+                    <input type="radio" name="payment_method" value="card">
+                    <span>Банковская карта</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- БЛОК 3: Способ доставки -->
+        <div class="checkout-block">
+            <h2>Способ доставки</h2>
+            <div class="delivery-methods">
+                <label class="delivery-option">
+                    <input type="radio" name="delivery_method" value="pickup" checked>
+                    <span>Самовывоз</span>
+                    <span class="delivery-price">Бесплатно</span>
+                </label>
+                <label class="delivery-option">
+                    <input type="radio" name="delivery_method" value="courier">
+                    <span>Курьер</span>
+                    <span class="delivery-price">300 ₽</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- БЛОК 4: Итоговая стоимость -->
+        <div class="checkout-block checkout-total">
+            <h2>Итого</h2>
+            <div class="total-breakdown">
+                <div class="total-row">
+                    <span>Товары:</span>
+                    <span>{{ total_price }} ₽</span>
+                </div>
+                {% if discount > 0 %}
+                <div class="total-row discount">
+                    <span>Скидка:</span>
+                    <span>−{{ discount }} ₽</span>
+                </div>
+                {% endif %}
+                <div class="total-row" id="delivery-cost-row">
+                    <span>Доставка:</span>
+                    <span id="delivery-cost">0 ₽</span>
+                </div>
+                <div class="total-row final">
+                    <span>Сумма:</span>
+                    <span id="final-total">{{ final_price|default:total_price }} ₽</span>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-large btn-submit-order">
+                Подтвердить заказ
+            </button>
+        </div>
+    </div>
+</form>
+
+<script>
+// Обновление стоимости доставки
+document.addEventListener('DOMContentLoaded', function() {
+    const deliveryRadios = document.querySelectorAll('input[name="delivery_method"]');
+    const deliveryCost = document.getElementById('delivery-cost');
+    const finalTotal = document.getElementById('final-total');
+    const baseTotal = {{ final_price|default:total_price }};
+    
+    deliveryRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            let deliveryPrice = 0;
+            if (this.value === 'courier') {
+                deliveryPrice = 300;
+            }
+            deliveryCost.textContent = deliveryPrice + ' ₽';
+            finalTotal.textContent = (baseTotal + deliveryPrice) + ' ₽';
+        });
+    });
+});
+</script>
+
+{% else %}
+<!-- Пустая корзина -->
+<div class="empty-cart">
+    <div class="empty-cart-icon">🛒</div>
+    <h2>Корзина пуста</h2>
+    <p>Добавьте товары в корзину перед оформлением заказа</p>
+    <a href="{% url 'books' %}" class="btn btn-primary">Добавить товары</a>
+</div>
+{% endif %}
+
+{% endblock %}

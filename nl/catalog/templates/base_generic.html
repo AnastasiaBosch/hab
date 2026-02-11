@@ -56,13 +56,12 @@
                     {% endif %}
                 </div>
 
-                <!-- Навигация (только SVG) -->
+                <!-- Навигация (SVG иконки) -->
                 <nav class="main-nav">
                     <a href="{% url 'news' %}" class="nav-item nav-new {% if request.resolver_match.url_name == 'news' or request.resolver_match.url_name == 'news-detail' %}active{% endif %}" title="Новинки"></a>
                     <a href="{% url 'books' %}" class="nav-item nav-catalog {% if request.resolver_match.url_name == 'books' or request.resolver_match.url_name == 'book-detail' %}active{% endif %}" title="Каталог"></a>
-                    <a href="{% url 'faq' %}" class="nav-item nav-delivery {% if request.resolver_match.url_name == 'faq' %}active{% endif %}" title="Доставка"></a>
                     <a href="{% url 'cart' %}" class="nav-item nav-cart {% if request.resolver_match.url_name == 'cart' %}active{% endif %}" title="Корзина"></a>
-                    <a href="{% url 'profile' %}" class="nav-item nav-contacts {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" title="Контакты"></a>
+                    <a href="{% url 'faq' %}" class="nav-item nav-contacts {% if request.resolver_match.url_name == 'faq' or request.resolver_match.url_name == 'profile' %}active{% endif %}" title="Контакты / FAQ"></a>
                 </nav>
             </div>
         </header>

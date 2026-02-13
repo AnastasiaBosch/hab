@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from .models import Book, Author, Genre, News, UserProfile, Purchase, UserRole
 from django.views import generic
-from django.urls import reverse
 from django.db.models import Q
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User 
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
@@ -14,6 +14,8 @@ from django.views.generic import ListView, UpdateView, CreateView, TemplateView
 import datetime
 from .forms import UserRegisterForm
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_protect
+
 
 def index(request):
     num_books = Book.objects.all().count()
@@ -70,6 +72,7 @@ class BookListView(generic.ListView):
     
 class BookDetailView(generic.DetailView):
     model = Book
+    template_name = 'book_detail.html'
 
 class NewsListView(generic.ListView):
     model = News
@@ -197,6 +200,7 @@ def clear_cart(request):
     return redirect('cart')
 
 @login_required
+@csrf_protect
 def checkout(request):
     if not request.user.is_authenticated:
         messages.error(request, 'Войдите, чтобы оформить заказ')
@@ -275,9 +279,9 @@ def checkout(request):
         
         messages.success(
             request, 
-            f'✅ Заказ оформлен! Статус: 🟡 Создан<br>'
-            f'Сумма: {total_price:.2f} руб.<br>'
-            f'Способ оплаты: {payment_display}<br>'
+            f'Заказ оформлен! Статус: 🟡 Создан'
+            f'Сумма: {total_price:.2f} руб.'
+            f'Способ оплаты: {payment_display}'
             f'Способ доставки: {delivery_display}'
         )
         

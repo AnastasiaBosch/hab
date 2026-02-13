@@ -1,0 +1,62 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Все новости — Книжный магазин «Бакен»{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Все новости книжного магазина Бакен в Красноярске. Анонсы новинок, события и акции.">
+{% endblock %}
+
+{% block content %}
+<div class="news-container">
+    <div class="page-header">
+        <h1>Все новости</h1>
+    </div>
+
+    {% if news_list %}
+        {% for news in news_list %}
+            <article class="news-article">
+                <span class="date_added">{{ news.published_date|date:"d E Y г." }}</span>
+                <h3><a href="{% url 'news-detail' news.pk %}">{{ news.title }}</a></h3>
+                <div class="article-content">
+                    {{ news.content|truncatewords_html:50|safe }}
+                </div>
+            </article>
+        {% endfor %}
+
+        <!-- Пагинация -->
+        {% if is_paginated %}
+            <div class="pagination-container">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li><a href="?page={{ page_obj.previous_page_number }}">←</a></li>
+                    {% else %}
+                        <li class="disabled"><span>←</span></li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="active"><span>{{ num }}</span></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li><a href="?page={{ num }}">{{ num }}</a></li>
+                        {% elif num == 1 or num == page_obj.paginator.num_pages %}
+                            <li><a href="?page={{ num }}">{{ num }}</a></li>
+                        {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+                            <li class="disabled"><span>...</span></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}">→</a></li>
+                    {% else %}
+                        <li class="disabled"><span>→</span></li>
+                    {% endif %}
+                </ul>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="news-article">
+            <p>Новостей пока нет.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

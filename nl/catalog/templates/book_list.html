@@ -1,0 +1,93 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Каталог книг — Книжный магазин «Бакен»{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Каталог книг книжного магазина Бакен. Широкий выбор книг с доставкой.">
+{% endblock %}
+
+{% block content %}
+<div class="news-container">
+    <div class="page-header">
+        <h1>Каталог книг</h1>
+        <div class="subtitle">Лучшие книги с доставкой по всему миру</div>
+    </div>
+
+    {% if book_list %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-top: 30px;">
+            {% for book in book_list %}
+                <div class="news-article" style="padding: 15px;">
+                    {% if book.cover %}
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <img src="{{ book.cover.url }}" alt="{{ book.title }}" style="max-width: 100%; height: auto; border-radius: 4px;">
+                        </div>
+                    {% endif %}
+                    <h3 style="font-size: 16px; margin-bottom: 8px;">
+                        <a href="{% url 'book-detail' book.pk %}">{{ book.title }}</a>
+                    </h3>
+                    {% if book.author %}
+                        <p style="color: #666; font-size: 14px; margin-bottom: 8px;">{{ book.author }}</p>
+                    {% endif %}
+                    {% if book.price %}
+                        <p style="font-weight: 600; color: #333;">{{ book.price }} ₽</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Пагинация -->
+        {% if is_paginated %}
+            <div class="pagination-container">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li><a href="?page={{ page_obj.previous_page_number }}">←</a></li>
+                    {% else %}
+                        <li class="disabled"><span>←</span></li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="active"><span>{{ num }}</span></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li><a href="?page={{ num }}">{{ num }}</a></li>
+                        {% elif num == 1 or num == page_obj.paginator.num_pages %}
+                            <li><a href="?page={{ num }}">{{ num }}</a></li>
+                        {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+                            <li class="disabled"><span>...</span></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}">→</a></li>
+                    {% else %}
+                        <li class="disabled"><span>→</span></li>
+                    {% endif %}
+                </ul>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="news-article">
+            <p>Книг пока нет в каталоге.</p>
+        </div>
+    {% endif %}
+</div>
+
+{% block extra_css %}
+<style>
+    /* Адаптивная сетка для книг */
+    @media (max-width: 768px) {
+        .news-container > div[style*="grid"] {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+            gap: 15px !important;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .news-container > div[style*="grid"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 10px !important;
+        }
+    }
+</style>
+{% endblock %}
+{% endblock %}
